@@ -24,7 +24,7 @@ const api = new WooCommerceRestApi({
 export async function getProducts() {
   try {
     const response = await api.get("products", {
-        per_page: 20,
+        per_page: 100,
     });
     return response.data;
   } catch (error) {
@@ -36,7 +36,7 @@ export async function getProducts() {
 export async function getOrders() {
     try {
       const response = await api.get("orders", {
-          per_page: 20,
+          per_page: 100,
       });
       return response.data;
     } catch (error) {
@@ -48,7 +48,7 @@ export async function getOrders() {
   export async function getCustomers() {
     try {
       const response = await api.get("customers", {
-        per_page: 20,
+        per_page: 100,
       });
       return response.data;
     } catch (error) {
