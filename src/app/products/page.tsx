@@ -170,7 +170,7 @@ export default async function ProductsPage({
             </CardContent>
             <CardFooter>
               <div className="text-xs text-muted-foreground">
-                Page {currentPage} of {totalPages} ({totalProducts} products)
+                Showing <strong>1-{products.length}</strong> of <strong>{totalProducts}</strong> products
               </div>
               <div className="ml-auto flex items-center gap-2">
                 <Button asChild variant="outline" size="sm" disabled={!hasPrevPage}>
