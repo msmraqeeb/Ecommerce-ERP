@@ -1,7 +1,4 @@
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
-import dotenv from 'dotenv';
-
-dotenv.config({ path: '.env.local' });
 
 if (!process.env.WOOCOMMERCE_API_URL || !process.env.WOOCOMMERCE_CONSUMER_KEY || !process.env.WOOCOMMERCE_CONSUMER_SECRET) {
     console.warn("WooCommerce API credentials are not set. Please check your .env.local file.");
