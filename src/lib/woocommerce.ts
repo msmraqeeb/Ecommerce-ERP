@@ -24,7 +24,7 @@ export async function getProducts(page = 1, status: ProductStatus = 'all') {
         page: page,
     };
 
-    if (status && status !== 'all') {
+    if (status === 'publish' || status === 'draft') {
         params.status = status;
     }
 
