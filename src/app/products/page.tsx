@@ -26,13 +26,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MoreHorizontal, PlusCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getProducts, getProductCounts } from "@/lib/woocommerce";
 import type { Product } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-type ProductStatus = 'any' | 'publish' | 'draft';
+type ProductStatus = 'all' | 'publish' | 'draft';
 
 export default async function ProductsPage({
   searchParams
@@ -43,7 +42,7 @@ export default async function ProductsPage({
   }
 }) {
   const currentPage = Number(searchParams?.page) || 1;
-  const currentStatus = searchParams?.status || 'any';
+  const currentStatus = searchParams?.status || 'all';
   
   const { products, totalPages, totalProducts } = await getProducts(currentPage, currentStatus);
   const counts = await getProductCounts();
@@ -66,7 +65,7 @@ export default async function ProductsPage({
   const hasNextPage = currentPage < totalPages;
   const hasPrevPage = currentPage > 1;
 
-  const getStatusCount = (status: 'any' | 'publish' | 'draft') => {
+  const getStatusCount = (status: 'all' | 'publish' | 'draft') => {
     switch(status) {
       case 'publish':
         return counts.published;
@@ -77,7 +76,7 @@ export default async function ProductsPage({
     }
   }
 
-  const tabValues: ProductStatus[] = ['any', 'publish', 'draft'];
+  const tabValues: ProductStatus[] = ['all', 'publish', 'draft'];
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -86,7 +85,7 @@ export default async function ProductsPage({
              {tabValues.map(status => (
                 <Link 
                   key={status} 
-                  href={{ pathname: '/products', query: { status: status === 'any' ? undefined : status } }}
+                  href={{ pathname: '/products', query: { status: status === 'all' ? undefined : status } }}
                   className={cn(
                     "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
                     currentStatus === status ? "bg-background text-foreground shadow-sm" : "hover:bg-background/50"
@@ -177,13 +176,13 @@ export default async function ProductsPage({
               </div>
               <div className="ml-auto flex items-center gap-2">
                 <Button asChild variant="outline" size="sm" disabled={!hasPrevPage}>
-                  <Link href={{ pathname: '/products', query: { status: currentStatus === 'any' ? undefined : currentStatus, page: currentPage - 1 } }}>
+                  <Link href={{ pathname: '/products', query: { status: currentStatus === 'all' ? undefined : currentStatus, page: currentPage - 1 } }}>
                     <ChevronLeft className="h-4 w-4" />
                     <span className="sr-only">Previous</span>
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="sm" disabled={!hasNextPage}>
-                  <Link href={{ pathname: '/products', query: { status: currentStatus === 'any' ? undefined : currentStatus, page: currentPage + 1 } }}>
+                  <Link href={{ pathname: '/products', query: { status: currentStatus === 'all' ? undefined : currentStatus, page: currentPage + 1 } }}>
                     <span className="sr-only">Next</span>
                     <ChevronRight className="h-4 w-4" />
                   </Link>
