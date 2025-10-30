@@ -1,4 +1,5 @@
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
+import type { ProductStatus } from "@/lib/types";
 
 const wooCommerceApiUrl = process.env.NEXT_PUBLIC_WOOCOMMERCE_API_URL;
 const wooCommerceConsumerKey = process.env.NEXT_PUBLIC_WOOCOMMERCE_CONSUMER_KEY;
@@ -16,14 +17,14 @@ const api = new WooCommerceRestApi({
   queryStringAuth: true,
 });
 
-export async function getProducts(page = 1, status: 'all' | 'publish' | 'draft' = 'all') {
+export async function getProducts(page = 1, status: ProductStatus = 'all') {
   try {
     const params: { per_page: number; page: number; status?: 'publish' | 'draft' } = {
         per_page: 20,
         page: page,
     };
 
-    if (status !== 'all') {
+    if (status && status !== 'all') {
         params.status = status;
     }
 

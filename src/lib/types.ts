@@ -1,3 +1,5 @@
+export type ProductStatus = 'all' | 'publish' | 'draft';
+
 export type Product = {
   id: number;
   name: string;

@@ -28,10 +28,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, PlusCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getProducts, getProductCounts } from "@/lib/woocommerce";
-import type { Product } from "@/lib/types";
+import type { Product, ProductStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-type ProductStatus = 'all' | 'publish' | 'draft';
 
 export default async function ProductsPage({
   searchParams
