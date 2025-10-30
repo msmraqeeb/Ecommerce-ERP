@@ -5,9 +5,9 @@ if (!process.env.WOOCOMMERCE_API_URL || !process.env.WOOCOMMERCE_CONSUMER_KEY ||
 }
 
 const api = new WooCommerceRestApi({
-  url: process.env.WOOCOMMERCE_API_URL || '',
-  consumerKey: process.env.WOOCOMMERCE_CONSUMER_KEY || '',
-  consumerSecret: process.env.WOOCOMMERCE_CONSUMER_SECRET || '',
+  url: process.env.WOOCOMMERCE_API_URL!,
+  consumerKey: process.env.WOOCOMMERCE_CONSUMER_KEY!,
+  consumerSecret: process.env.WOOCOMMERCE_CONSUMER_SECRET!,
   version: "wc/v3",
   axiosConfig: {
     headers: {
