@@ -21,12 +21,12 @@ const api = new WooCommerceRestApi({
   }
 });
 
-export async function getProducts(page = 1, status: 'publish' | 'draft' | 'any' = 'publish') {
+export async function getProducts(page = 1, status?: 'publish' | 'draft') {
   try {
     const response = await api.get("products", {
         per_page: 20,
         page: page,
-        status: status,
+        status: status || 'any',
     });
     return {
       products: response.data,

@@ -36,13 +36,13 @@ export default async function ProductsPage({
 }: {
   searchParams?: {
     page?: string;
-    status?: 'publish' | 'draft' | 'any';
+    status?: 'publish' | 'draft';
   }
 }) {
   const currentPage = Number(searchParams?.page) || 1;
-  const currentStatus = searchParams?.status || 'any';
+  const currentStatus = searchParams?.status;
   
-  const { products, totalPages, totalProducts } = await getProducts(currentPage, currentStatus === 'any' ? undefined : currentStatus);
+  const { products, totalPages, totalProducts } = await getProducts(currentPage, currentStatus);
   const counts = await getProductCounts();
 
   const getStatusBadge = (status: 'instock' | 'outofstock' | 'onbackorder' | 'publish' | 'draft') => {
@@ -78,11 +78,11 @@ export default async function ProductsPage({
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-       <Tabs defaultValue={currentStatus}>
+       <Tabs defaultValue={currentStatus || 'any'}>
         <div className="flex items-center">
           <TabsList>
             {tabValues.map(status => (
-              <Link href={{ pathname: '/products', query: { status: status, page: 1 } }} key={status} passHref>
+              <Link href={{ pathname: '/products', query: { status: status === 'any' ? undefined : status, page: 1 } }} key={status} passHref>
                 <TabsTrigger value={status}>
                   {status.charAt(0).toUpperCase() + status.slice(1)} ({getStatusCount(status)})
                 </TabsTrigger>
@@ -98,7 +98,7 @@ export default async function ProductsPage({
             </Button>
           </div>
         </div>
-        <TabsContent value={currentStatus}>
+        <TabsContent value={currentStatus || 'any'}>
           <Card>
             <CardHeader>
               <CardTitle className="font-headline">Products</CardTitle>
