@@ -28,12 +28,12 @@ export function OverviewChart() {
             fontSize={12}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(value) => `$${value}`}
+            tickFormatter={(value) => `৳${value}`}
           />
           <Tooltip
             cursorClassName="fill-muted"
             content={<ChartTooltipContent
-              formatter={(value) => `$${value}`}
+              formatter={(value) => `৳${value}`}
               indicator="dot"
                />}
           />

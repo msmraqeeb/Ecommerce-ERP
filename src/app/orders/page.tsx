@@ -110,7 +110,7 @@ export default async function OrdersPage() {
                         {format(new Date(order.date_created), 'MMMM dd, yyyy')}
                       </TableCell>
                       <TableCell className="text-right">
-                        ${order.total}
+                        ৳{order.total}
                       </TableCell>
                        <TableCell>
                         <DropdownMenu>

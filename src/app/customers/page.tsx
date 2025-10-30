@@ -60,7 +60,7 @@ export default async function CustomersPage() {
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">{customer.email}</TableCell>
                   <TableCell className="hidden sm:table-cell">{customer.orders_count}</TableCell>
-                  <TableCell className="text-right">${customer.total_spent}</TableCell>
+                  <TableCell className="text-right">৳{customer.total_spent}</TableCell>
                    <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

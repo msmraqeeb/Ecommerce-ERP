@@ -3,7 +3,7 @@ import type { Product, Order, Customer } from './types';
 export const totalMetrics = [
   {
     title: 'Total Revenue',
-    value: '$45,231.89',
+    value: '৳45,231.89',
     change: '+20.1% from last month',
     icon: 'DollarSign',
   },
@@ -47,7 +47,7 @@ export const recentSales = [
       id: "1",
       name: "Olivia Martin",
       email: "olivia.martin@email.com",
-      amount: "$1,999.00",
+      amount: "৳1,999.00",
       avatar: {
         src: "https://picsum.photos/seed/1/40/40",
         fallback: "OM",
@@ -58,7 +58,7 @@ export const recentSales = [
       id: "2",
       name: "Jackson Lee",
       email: "jackson.lee@email.com",
-      amount: "$39.00",
+      amount: "৳39.00",
       avatar: {
         src: "https://picsum.photos/seed/2/40/40",
         fallback: "JL",
@@ -69,7 +69,7 @@ export const recentSales = [
       id: "3",
       name: "Isabella Nguyen",
       email: "isabella.nguyen@email.com",
-      amount: "$299.00",
+      amount: "৳299.00",
       avatar: {
         src: "https://picsum.photos/seed/3/40/40",
         fallback: "IN",
@@ -80,7 +80,7 @@ export const recentSales = [
       id: "4",
       name: "William Kim",
       email: "will@email.com",
-      amount: "$99.00",
+      amount: "৳99.00",
       avatar: {
         src: "https://picsum.photos/seed/4/40/40",
         fallback: "WK",
@@ -91,7 +91,7 @@ export const recentSales = [
       id: "5",
       name: "Sofia Davis",
       email: "sofia.davis@email.com",
-      amount: "$39.00",
+      amount: "৳39.00",
       avatar: {
         src: "https://picsum.photos/seed/5/40/40",
         fallback: "SD",

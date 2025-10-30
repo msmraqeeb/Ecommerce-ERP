@@ -115,7 +115,7 @@ export default async function ProductsPage({
                       </TableCell>
                       <TableCell className="font-medium">{product.name}</TableCell>
                       <TableCell>{getStatusBadge(product.stock_status)}</TableCell>
-                      <TableCell className="hidden md:table-cell">${product.price}</TableCell>
+                      <TableCell className="hidden md:table-cell">৳{product.price}</TableCell>
                       <TableCell className="hidden md:table-cell">{product.total_sales}</TableCell>
                       <TableCell>
                         <DropdownMenu>
