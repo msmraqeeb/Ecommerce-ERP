@@ -42,7 +42,7 @@ export default async function ProductsPage({
   const currentPage = Number(searchParams?.page) || 1;
   const currentStatus = searchParams?.status || 'any';
   
-  const { products, totalPages, totalProducts } = await getProducts(currentPage, currentStatus === 'any' ? 'publish' : currentStatus);
+  const { products, totalPages, totalProducts } = await getProducts(currentPage, currentStatus === 'any' ? undefined : currentStatus);
   const counts = await getProductCounts();
 
   const getStatusBadge = (status: 'instock' | 'outofstock' | 'onbackorder' | 'publish' | 'draft') => {
@@ -171,13 +171,13 @@ export default async function ProductsPage({
               </div>
               <div className="ml-auto flex items-center gap-2">
                 <Button asChild variant="outline" size="sm" disabled={!hasPrevPage}>
-                  <Link href={{ pathname: '/products', query: { ...searchParams, page: currentPage - 1 } }}>
+                  <Link href={{ pathname: '/products', query: { status: currentStatus, page: currentPage - 1 } }}>
                     <ChevronLeft className="h-4 w-4" />
                     <span className="sr-only">Previous</span>
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="sm" disabled={!hasNextPage}>
-                   <Link href={{ pathname: '/products', query: { ...searchParams, page: currentPage + 1 } }}>
+                   <Link href={{ pathname: '/products', query: { status: currentStatus, page: currentPage + 1 } }}>
                     <span className="sr-only">Next</span>
                     <ChevronRight className="h-4 w-4" />
                   </Link>
