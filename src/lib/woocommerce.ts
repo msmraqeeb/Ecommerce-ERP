@@ -29,6 +29,7 @@ export async function getProducts(page = 1, status: ProductStatus = 'all') {
     }
 
     const response = await api.get("products", params);
+    
     return {
       products: response.data,
       totalPages: Number(response.headers['x-wp-totalpages']),
