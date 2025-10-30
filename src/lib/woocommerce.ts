@@ -29,7 +29,7 @@ export async function getProducts(page = 1) {
     });
     return {
       products: response.data,
-      totalPages: response.headers['x-wp-totalpages']
+      totalPages: Number(response.headers['x-wp-totalpages'])
     };
   } catch (error) {
     console.error("Error fetching products:", error);
