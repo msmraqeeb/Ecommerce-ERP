@@ -31,18 +31,20 @@ import { MoreHorizontal, PlusCircle, ChevronLeft, ChevronRight } from 'lucide-re
 import { getProducts, getProductCounts } from "@/lib/woocommerce";
 import type { Product } from "@/lib/types";
 
+type ProductStatus = 'any' | 'publish' | 'draft';
+
 export default async function ProductsPage({
   searchParams
 }: {
   searchParams?: {
     page?: string;
-    status?: 'publish' | 'draft';
+    status?: ProductStatus;
   }
 }) {
   const currentPage = Number(searchParams?.page) || 1;
-  const currentStatus = searchParams?.status;
+  const currentStatus = searchParams?.status || 'any';
   
-  const { products, totalPages, totalProducts } = await getProducts(currentPage, currentStatus);
+  const { products, totalPages, totalProducts } = await getProducts(currentPage, currentStatus === 'any' ? undefined : currentStatus);
   const counts = await getProductCounts();
 
   const getStatusBadge = (status: 'instock' | 'outofstock' | 'onbackorder' | 'publish' | 'draft') => {
@@ -74,11 +76,100 @@ export default async function ProductsPage({
     }
   }
 
-  const tabValues: ('any' | 'publish' | 'draft')[] = ['any', 'publish', 'draft'];
+  const tabValues: ProductStatus[] = ['any', 'publish', 'draft'];
+
+  const renderContent = () => (
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-headline">Products</CardTitle>
+          <CardDescription>
+            Manage your products and view their inventory status.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="hidden w-[100px] sm:table-cell">
+                  <span className="sr-only">Image</span>
+                </TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="hidden md:table-cell">Price</TableHead>
+                <TableHead className="hidden md:table-cell">
+                  Stock Status
+                </TableHead>
+                <TableHead>
+                  <span className="sr-only">Actions</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {products.map((product) => (
+                <TableRow key={product.id}>
+                  <TableCell className="hidden sm:table-cell">
+                    <Image
+                      alt={product.name}
+                      className="aspect-square rounded-md object-cover"
+                      height="40"
+                      src={product.images[0]?.src || "https://picsum.photos/seed/placeholder/40/40"}
+                      width="40"
+                      data-ai-hint="product image"
+                    />
+                  </TableCell>
+                  <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell>{getStatusBadge(product.status)}</TableCell>
+                  <TableCell className="hidden md:table-cell">৳{product.price}</TableCell>
+                  <TableCell className="hidden md:table-cell">{getStatusBadge(product.stock_status)}</TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button aria-haspopup="true" size="icon" variant="ghost">
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">Toggle menu</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-destructive">
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+        <CardFooter>
+          <div className="text-xs text-muted-foreground">
+            Page {currentPage} of {totalPages} ({totalProducts} products)
+          </div>
+          <div className="ml-auto flex items-center gap-2">
+            <Button asChild variant="outline" size="sm" disabled={!hasPrevPage}>
+              <Link href={{ pathname: '/products', query: { status: currentStatus === 'any' ? undefined : currentStatus, page: currentPage - 1 } }}>
+                <ChevronLeft className="h-4 w-4" />
+                <span className="sr-only">Previous</span>
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="sm" disabled={!hasNextPage}>
+               <Link href={{ pathname: '/products', query: { status: currentStatus === 'any' ? undefined : currentStatus, page: currentPage + 1 } }}>
+                <span className="sr-only">Next</span>
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
+  );
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-       <Tabs defaultValue={currentStatus || 'any'}>
+       <Tabs value={currentStatus}>
         <div className="flex items-center">
           <TabsList>
             {tabValues.map(status => (
@@ -98,94 +189,11 @@ export default async function ProductsPage({
             </Button>
           </div>
         </div>
-        <TabsContent value={currentStatus || 'any'}>
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-headline">Products</CardTitle>
-              <CardDescription>
-                Manage your products and view their inventory status.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="hidden w-[100px] sm:table-cell">
-                      <span className="sr-only">Image</span>
-                    </TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="hidden md:table-cell">Price</TableHead>
-                    <TableHead className="hidden md:table-cell">
-                      Stock Status
-                    </TableHead>
-                    <TableHead>
-                      <span className="sr-only">Actions</span>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {products.map((product) => (
-                    <TableRow key={product.id}>
-                      <TableCell className="hidden sm:table-cell">
-                        <Image
-                          alt={product.name}
-                          className="aspect-square rounded-md object-cover"
-                          height="40"
-                          src={product.images[0]?.src || "https://picsum.photos/seed/placeholder/40/40"}
-                          width="40"
-                          data-ai-hint="product image"
-                        />
-                      </TableCell>
-                      <TableCell className="font-medium">{product.name}</TableCell>
-                      <TableCell>{getStatusBadge(product.status)}</TableCell>
-                      <TableCell className="hidden md:table-cell">৳{product.price}</TableCell>
-                      <TableCell className="hidden md:table-cell">{getStatusBadge(product.stock_status)}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button aria-haspopup="true" size="icon" variant="ghost">
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Toggle menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-            <CardFooter>
-              <div className="text-xs text-muted-foreground">
-                Page {currentPage} of {totalPages} ({totalProducts} products)
-              </div>
-              <div className="ml-auto flex items-center gap-2">
-                <Button asChild variant="outline" size="sm" disabled={!hasPrevPage}>
-                  <Link href={{ pathname: '/products', query: { status: currentStatus, page: currentPage - 1 } }}>
-                    <ChevronLeft className="h-4 w-4" />
-                    <span className="sr-only">Previous</span>
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" size="sm" disabled={!hasNextPage}>
-                   <Link href={{ pathname: '/products', query: { status: currentStatus, page: currentPage + 1 } }}>
-                    <span className="sr-only">Next</span>
-                    <ChevronRight className="h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
-            </CardFooter>
-          </Card>
-        </TabsContent>
+        {tabValues.map(status => (
+          <TabsContent key={status} value={status}>
+            {renderContent()}
+          </TabsContent>
+        ))}
       </Tabs>
     </div>
   );
