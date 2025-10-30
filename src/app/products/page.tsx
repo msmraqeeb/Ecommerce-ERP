@@ -26,7 +26,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MoreHorizontal, PlusCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getProducts, getProductCounts } from "@/lib/woocommerce";
 import type { Product } from "@/lib/types";
@@ -80,19 +80,18 @@ export default async function ProductsPage({
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-       <div className="flex items-center">
-        <Tabs value={currentStatus}>
-          <TabsList>
-            {tabValues.map(status => (
-              <Link href={{ pathname: '/products', query: { status: status === 'any' ? undefined : status } }} key={status} passHref>
-                <TabsTrigger value={status} className="cursor-pointer">
-                  {status.charAt(0).toUpperCase() + status.slice(1)} ({getStatusCount(status)})
-                </TabsTrigger>
-              </Link>
-            ))}
-          </TabsList>
-        </Tabs>
-        <div className="ml-auto flex items-center gap-2">
+      <Tabs value={currentStatus}>
+        <div className="flex items-center">
+            <TabsList>
+              {tabValues.map(status => (
+                <Link key={status} href={{ pathname: '/products', query: { status: status === 'any' ? undefined : status } }} passHref legacyBehavior>
+                  <TabsTrigger value={status} asChild>
+                    <a>{status.charAt(0).toUpperCase() + status.slice(1)} ({getStatusCount(status)})</a>
+                  </TabsTrigger>
+                </Link>
+              ))}
+            </TabsList>
+          <div className="ml-auto flex items-center gap-2">
             <Button size="sm" className="h-8 gap-1">
               <PlusCircle className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -101,93 +100,95 @@ export default async function ProductsPage({
             </Button>
           </div>
         </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-headline">Products</CardTitle>
-          <CardDescription>
-            Manage your products and view their inventory status.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="hidden w-[100px] sm:table-cell">
-                  <span className="sr-only">Image</span>
-                </TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="hidden md:table-cell">Price</TableHead>
-                <TableHead className="hidden md:table-cell">
-                  Stock Status
-                </TableHead>
-                <TableHead>
-                  <span className="sr-only">Actions</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell className="hidden sm:table-cell">
-                    <Image
-                      alt={product.name}
-                      className="aspect-square rounded-md object-cover"
-                      height="40"
-                      src={product.images[0]?.src || "https://picsum.photos/seed/placeholder/40/40"}
-                      width="40"
-                      data-ai-hint="product image"
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{getStatusBadge(product.status)}</TableCell>
-                  <TableCell className="hidden md:table-cell">৳{product.price}</TableCell>
-                  <TableCell className="hidden md:table-cell">{getStatusBadge(product.stock_status)}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive">
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-        <CardFooter>
-          <div className="text-xs text-muted-foreground">
-            Page {currentPage} of {totalPages} ({totalProducts} products)
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            <Button asChild variant="outline" size="sm" disabled={!hasPrevPage}>
-              <Link href={{ pathname: '/products', query: { status: currentStatus === 'any' ? undefined : currentStatus, page: currentPage - 1 } }}>
-                <ChevronLeft className="h-4 w-4" />
-                <span className="sr-only">Previous</span>
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="sm" disabled={!hasNextPage}>
-               <Link href={{ pathname: '/products', query: { status: currentStatus === 'any' ? undefined : currentStatus, page: currentPage + 1 } }}>
-                <span className="sr-only">Next</span>
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </CardFooter>
-      </Card>
+        <TabsContent value={currentStatus} className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-headline">Products</CardTitle>
+              <CardDescription>
+                Manage your products and view their inventory status.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="hidden w-[100px] sm:table-cell">
+                      <span className="sr-only">Image</span>
+                    </TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="hidden md:table-cell">Price</TableHead>
+                    <TableHead className="hidden md:table-cell">
+                      Stock Status
+                    </TableHead>
+                    <TableHead>
+                      <span className="sr-only">Actions</span>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {products.map((product) => (
+                    <TableRow key={product.id}>
+                      <TableCell className="hidden sm:table-cell">
+                        <Image
+                          alt={product.name}
+                          className="aspect-square rounded-md object-cover"
+                          height="40"
+                          src={product.images[0]?.src || "https://picsum.photos/seed/placeholder/40/40"}
+                          width="40"
+                          data-ai-hint="product image"
+                        />
+                      </TableCell>
+                      <TableCell className="font-medium">{product.name}</TableCell>
+                      <TableCell>{getStatusBadge(product.status)}</TableCell>
+                      <TableCell className="hidden md:table-cell">৳{product.price}</TableCell>
+                      <TableCell className="hidden md:table-cell">{getStatusBadge(product.stock_status)}</TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button aria-haspopup="true" size="icon" variant="ghost">
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Toggle menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                            <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-destructive">
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+            <CardFooter>
+              <div className="text-xs text-muted-foreground">
+                Page {currentPage} of {totalPages} ({totalProducts} products)
+              </div>
+              <div className="ml-auto flex items-center gap-2">
+                <Button asChild variant="outline" size="sm" disabled={!hasPrevPage}>
+                  <Link href={{ pathname: '/products', query: { status: currentStatus === 'any' ? undefined : currentStatus, page: currentPage - 1 } }}>
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="sr-only">Previous</span>
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" disabled={!hasNextPage}>
+                  <Link href={{ pathname: '/products', query: { status: currentStatus === 'any' ? undefined : currentStatus, page: currentPage + 1 } }}>
+                    <span className="sr-only">Next</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
