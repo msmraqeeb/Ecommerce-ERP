@@ -13,21 +13,21 @@ const api = new WooCommerceRestApi({
   consumerKey: wooCommerceConsumerKey,
   consumerSecret: wooCommerceConsumerSecret,
   version: "wc/v3",
-  queryStringAuth: true, // Force authentication via query string
-  axiosConfig: {
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
-    }
-  }
+  queryStringAuth: true,
 });
 
-export async function getProducts(page = 1, status?: 'publish' | 'draft') {
+export async function getProducts(page = 1, status: 'any' | 'publish' | 'draft' = 'any') {
   try {
-    const response = await api.get("products", {
+    const params: { per_page: number; page: number; status?: 'publish' | 'draft' } = {
         per_page: 20,
         page: page,
-        status: status || 'any',
-    });
+    };
+
+    if (status !== 'any') {
+        params.status = status;
+    }
+
+    const response = await api.get("products", params);
     return {
       products: response.data,
       totalPages: Number(response.headers['x-wp-totalpages']),
