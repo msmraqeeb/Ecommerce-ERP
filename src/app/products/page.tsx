@@ -91,7 +91,7 @@ export default async function ProductsPage({
                     currentStatus === status ? "bg-background text-foreground shadow-sm" : "hover:bg-background/50"
                   )}
                 >
-                  {status.charAt(0).toUpperCase() + status.slice(1)} ({getStatusCount(status)})
+                  {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)} ({getStatusCount(status)})
                 </Link>
               ))}
             </div>
