@@ -1,3 +1,76 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "avatar-1",
+      "description": "Portrait of Olivia Martin",
+      "imageUrl": "https://images.unsplash.com/photo-1616002411355-49593fd89721?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHx3b21hbiUyMGZhY2V8ZW58MHx8fHwxNzYxODA2Njc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman face"
+    },
+    {
+      "id": "avatar-2",
+      "description": "Portrait of Jackson Lee",
+      "imageUrl": "https://images.unsplash.com/photo-1650630729397-810915b32ac9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxtYW4lMjBmYWNlfGVufDB8fHx8MTc2MTgxNzM3Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man face"
+    },
+    {
+      "id": "avatar-3",
+      "description": "Portrait of Isabella Nguyen",
+      "imageUrl": "https://images.unsplash.com/photo-1719087358997-12957d0859e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx3b21hbiUyMHNtaWxpbmd8ZW58MHx8fHwxNzYxNzgzNzUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman smiling"
+    },
+    {
+      "id": "avatar-4",
+      "description": "Portrait of William Kim",
+      "imageUrl": "https://images.unsplash.com/photo-1583195763986-0231686dcd43?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxtYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjE3NTYzNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man portrait"
+    },
+    {
+      "id": "avatar-5",
+      "description": "Portrait of Sofia Davis",
+      "imageUrl": "https://images.unsplash.com/photo-1610462679576-e591f04e6e1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx3b21hbiUyMHByb2ZpbGV8ZW58MHx8fHwxNzYxNzM3Mjc4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman profile"
+    },
+    {
+      "id": "prod-img-1",
+      "description": "Image of a cute teddy bear",
+      "imageUrl": "https://images.unsplash.com/photo-1648311203209-da34f7d0d800?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHx0ZWRkeSUyMGJlYXJ8ZW58MHx8fHwxNzYxNzk5NTU0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "teddy bear"
+    },
+    {
+      "id": "prod-img-2",
+      "description": "Image of a wooden blocks set",
+      "imageUrl": "https://images.unsplash.com/photo-1581716907788-95d259200b93?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b29kJTIwYmxvY2tzfGVufDB8fHx8MTc2MTc1NTcxMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wood blocks"
+    },
+    {
+      "id": "prod-img-3",
+      "description": "Image of a remote control car",
+      "imageUrl": "https://images.unsplash.com/photo-1572635196184-84e35138cf62?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx0b3klMjBjYXJ8ZW58MHx8fHwxNzYxNzM2NDczfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "toy car"
+    },
+    {
+      "id": "prod-img-4",
+      "description": "Image of a princess doll",
+      "imageUrl": "https://images.unsplash.com/photo-1545724149-1d8de3baa55c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxkb2xsfGVufDB8fHx8MTc2MTgxODY2Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "doll"
+    },
+    {
+      "id": "prod-img-5",
+      "description": "Image of a lego spaceship",
+      "imageUrl": "https://images.unsplash.com/photo-1585772964418-00d2cf187dfd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxsZWdvJTIwc3BhY2VzaGlwfGVufDB8fHx8MTc2MTgxODY2Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "lego spaceship"
+    },
+    {
+      "id": "prod-img-6",
+      "description": "Image of an art & craft kit",
+      "imageUrl": "https://images.unsplash.com/photo-1640110739689-09b7822d6982?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxhcnQlMjBjcmFmdHxlbnwwfHx8fDE3NjE2OTQyNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "art craft"
+    },
+    {
+      "id": "prod-img-7",
+      "description": "Image of a jigsaw puzzle",
+      "imageUrl": "https://images.unsplash.com/photo-1588591795084-1770cb3be374?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwdXp6bGV8ZW58MHx8fHwxNzYxODE4NjYyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "puzzle"
+    }
+  ]
 }
