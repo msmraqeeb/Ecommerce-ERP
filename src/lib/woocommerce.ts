@@ -21,24 +21,49 @@ const api = new WooCommerceRestApi({
   }
 });
 
-export async function getProducts(page = 1) {
+export async function getProducts(page = 1, status: 'publish' | 'draft' | 'any' = 'publish') {
   try {
     const response = await api.get("products", {
         per_page: 20,
         page: page,
+        status: status,
     });
     return {
       products: response.data,
-      totalPages: Number(response.headers['x-wp-totalpages'])
+      totalPages: Number(response.headers['x-wp-totalpages']),
+      totalProducts: Number(response.headers['x-wp-total'])
     };
   } catch (error) {
     console.error("Error fetching products:", error);
     return {
       products: [],
-      totalPages: 0
+      totalPages: 0,
+      totalProducts: 0
     };
   }
 }
+
+export async function getProductCounts() {
+  try {
+    const [published, draft] = await Promise.all([
+      api.get("products", { status: 'publish', per_page: 1 }),
+      api.get("products", { status: 'draft', per_page: 1 })
+    ]);
+
+    const publishedCount = Number(published.headers['x-wp-total']);
+    const draftCount = Number(draft.headers['x-wp-total']);
+
+    return {
+      all: publishedCount + draftCount,
+      published: publishedCount,
+      draft: draftCount,
+    };
+  } catch (error) {
+    console.error("Error fetching product counts:", error);
+    return { all: 0, published: 0, draft: 0 };
+  }
+}
+
 
 export async function getOrders() {
     try {

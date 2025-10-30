@@ -28,7 +28,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MoreHorizontal, PlusCircle, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getProducts } from "@/lib/woocommerce";
+import { getProducts, getProductCounts } from "@/lib/woocommerce";
 import type { Product } from "@/lib/types";
 
 export default async function ProductsPage({
@@ -36,12 +36,16 @@ export default async function ProductsPage({
 }: {
   searchParams?: {
     page?: string;
+    status?: 'publish' | 'draft' | 'any';
   }
 }) {
   const currentPage = Number(searchParams?.page) || 1;
-  const { products, totalPages } = await getProducts(currentPage);
+  const currentStatus = searchParams?.status || 'any';
+  
+  const { products, totalPages, totalProducts } = await getProducts(currentPage, currentStatus === 'any' ? 'publish' : currentStatus);
+  const counts = await getProductCounts();
 
-  const getStatusBadge = (status: 'instock' | 'outofstock' | 'onbackorder') => {
+  const getStatusBadge = (status: 'instock' | 'outofstock' | 'onbackorder' | 'publish' | 'draft') => {
     switch (status) {
       case 'instock':
         return <Badge variant="default">In Stock</Badge>;
@@ -49,21 +53,41 @@ export default async function ProductsPage({
         return <Badge variant="secondary">On Backorder</Badge>;
       case 'outofstock':
         return <Badge variant="destructive">Out of Stock</Badge>;
+      case 'publish':
+        return <Badge variant="default">Published</Badge>;
+      case 'draft':
+        return <Badge variant="secondary">Draft</Badge>;
     }
   };
 
   const hasNextPage = currentPage < totalPages;
   const hasPrevPage = currentPage > 1;
 
+  const getStatusCount = (status: 'any' | 'publish' | 'draft') => {
+    switch(status) {
+      case 'publish':
+        return counts.published;
+      case 'draft':
+        return counts.draft;
+      default:
+        return counts.all;
+    }
+  }
+
+  const tabValues: ('any' | 'publish' | 'draft')[] = ['any', 'publish', 'draft'];
+
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-       <Tabs defaultValue="all">
+       <Tabs defaultValue={currentStatus}>
         <div className="flex items-center">
           <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="in-stock">In Stock</TabsTrigger>
-            <TabsTrigger value="low-stock">On Backorder</TabsTrigger>
-            <TabsTrigger value="out-of-stock" className="hidden sm:flex">Out of Stock</TabsTrigger>
+            {tabValues.map(status => (
+              <Link href={{ pathname: '/products', query: { status: status, page: 1 } }} key={status} passHref>
+                <TabsTrigger value={status}>
+                  {status.charAt(0).toUpperCase() + status.slice(1)} ({getStatusCount(status)})
+                </TabsTrigger>
+              </Link>
+            ))}
           </TabsList>
           <div className="ml-auto flex items-center gap-2">
             <Button size="sm" className="h-8 gap-1">
@@ -74,7 +98,7 @@ export default async function ProductsPage({
             </Button>
           </div>
         </div>
-        <TabsContent value="all">
+        <TabsContent value={currentStatus}>
           <Card>
             <CardHeader>
               <CardTitle className="font-headline">Products</CardTitle>
@@ -93,7 +117,7 @@ export default async function ProductsPage({
                     <TableHead>Status</TableHead>
                     <TableHead className="hidden md:table-cell">Price</TableHead>
                     <TableHead className="hidden md:table-cell">
-                      Total Sales
+                      Stock Status
                     </TableHead>
                     <TableHead>
                       <span className="sr-only">Actions</span>
@@ -114,9 +138,9 @@ export default async function ProductsPage({
                         />
                       </TableCell>
                       <TableCell className="font-medium">{product.name}</TableCell>
-                      <TableCell>{getStatusBadge(product.stock_status)}</TableCell>
+                      <TableCell>{getStatusBadge(product.status)}</TableCell>
                       <TableCell className="hidden md:table-cell">৳{product.price}</TableCell>
-                      <TableCell className="hidden md:table-cell">{product.total_sales}</TableCell>
+                      <TableCell className="hidden md:table-cell">{getStatusBadge(product.stock_status)}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -143,17 +167,17 @@ export default async function ProductsPage({
             </CardContent>
             <CardFooter>
               <div className="text-xs text-muted-foreground">
-                Page {currentPage} of {totalPages}
+                Page {currentPage} of {totalPages} ({totalProducts} products)
               </div>
               <div className="ml-auto flex items-center gap-2">
                 <Button asChild variant="outline" size="sm" disabled={!hasPrevPage}>
-                  <Link href={{ pathname: '/products', query: { page: currentPage - 1 } }}>
+                  <Link href={{ pathname: '/products', query: { ...searchParams, page: currentPage - 1 } }}>
                     <ChevronLeft className="h-4 w-4" />
                     <span className="sr-only">Previous</span>
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="sm" disabled={!hasNextPage}>
-                   <Link href={{ pathname: '/products', query: { page: currentPage + 1 } }}>
+                   <Link href={{ pathname: '/products', query: { ...searchParams, page: currentPage + 1 } }}>
                     <span className="sr-only">Next</span>
                     <ChevronRight className="h-4 w-4" />
                   </Link>
