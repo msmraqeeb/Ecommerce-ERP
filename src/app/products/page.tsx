@@ -27,17 +27,19 @@ import {
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
-import { products } from '@/lib/data';
+import { getProducts } from "@/lib/woocommerce";
+import type { Product } from "@/lib/types";
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  const products: Product[] = await getProducts();
 
-  const getStatusBadge = (status: 'in-stock' | 'low-stock' | 'out-of-stock') => {
+  const getStatusBadge = (status: 'instock' | 'outofstock' | 'onbackorder') => {
     switch (status) {
-      case 'in-stock':
+      case 'instock':
         return <Badge variant="default">In Stock</Badge>;
-      case 'low-stock':
-        return <Badge variant="secondary">Low Stock</Badge>;
-      case 'out-of-stock':
+      case 'onbackorder':
+        return <Badge variant="secondary">On Backorder</Badge>;
+      case 'outofstock':
         return <Badge variant="destructive">Out of Stock</Badge>;
     }
   };
@@ -49,7 +51,7 @@ export default function ProductsPage() {
           <TabsList>
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="in-stock">In Stock</TabsTrigger>
-            <TabsTrigger value="low-stock">Low Stock</TabsTrigger>
+            <TabsTrigger value="low-stock">On Backorder</TabsTrigger>
             <TabsTrigger value="out-of-stock" className="hidden sm:flex">Out of Stock</TabsTrigger>
           </TabsList>
           <div className="ml-auto flex items-center gap-2">
@@ -95,15 +97,15 @@ export default function ProductsPage() {
                           alt={product.name}
                           className="aspect-square rounded-md object-cover"
                           height="40"
-                          src={product.image.src}
+                          src={product.images[0]?.src || "https://picsum.photos/seed/placeholder/40/40"}
                           width="40"
-                          data-ai-hint={product.image.hint}
+                          data-ai-hint="product image"
                         />
                       </TableCell>
                       <TableCell className="font-medium">{product.name}</TableCell>
-                      <TableCell>{getStatusBadge(product.status)}</TableCell>
-                      <TableCell className="hidden md:table-cell">${product.price.toFixed(2)}</TableCell>
-                      <TableCell className="hidden md:table-cell">{product.sales}</TableCell>
+                      <TableCell>{getStatusBadge(product.stock_status)}</TableCell>
+                      <TableCell className="hidden md:table-cell">${product.price}</TableCell>
+                      <TableCell className="hidden md:table-cell">{product.total_sales}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -130,7 +132,7 @@ export default function ProductsPage() {
             </CardContent>
             <CardFooter>
               <div className="text-xs text-muted-foreground">
-                Showing <strong>1-7</strong> of <strong>7</strong> products
+                Showing <strong>1-{products.length}</strong> of <strong>{products.length}</strong> products
               </div>
             </CardFooter>
           </Card>

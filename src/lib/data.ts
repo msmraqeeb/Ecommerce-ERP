@@ -100,35 +100,6 @@ export const recentSales = [
     },
   ];
 
-export const products: Product[] = [
-    { id: 'prod-001', name: 'Cute Teddy Bear', image: { src: 'https://picsum.photos/seed/101/40/40', hint: 'teddy bear' }, status: 'in-stock', price: 25.00, sales: 150, stock: 200 },
-    { id: 'prod-002', name: 'Wooden Blocks Set', image: { src: 'https://picsum.photos/seed/102/40/40', hint: 'wood blocks' }, status: 'in-stock', price: 45.50, sales: 200, stock: 80 },
-    { id: 'prod-003', name: 'Remote Control Car', image: { src: 'https://picsum.photos/seed/103/40/40', hint: 'toy car' }, status: 'low-stock', price: 89.99, sales: 80, stock: 15 },
-    { id: 'prod-004', name: 'Princess Doll', image: { src: 'https://picsum.photos/seed/104/40/40', hint: 'doll' }, status: 'out-of-stock', price: 32.00, sales: 250, stock: 0 },
-    { id: 'prod-005', name: 'Lego Spaceship', image: { src: 'https://picsum.photos/seed/105/40/40', hint: 'lego spaceship' }, status: 'in-stock', price: 120.00, sales: 50, stock: 50 },
-    { id: 'prod-006', name: 'Art & Craft Kit', image: { src: 'https://picsum.photos/seed/106/40/40', hint: 'art craft' }, status: 'in-stock', price: 35.00, sales: 120, stock: 100 },
-    { id: 'prod-007', name: 'Jigsaw Puzzle', image: { src: 'https://picsum.photos/seed/107/40/40', hint: 'puzzle' }, status: 'low-stock', price: 19.99, sales: 180, stock: 19 },
-];
-
-export const orders: Order[] = [
-    { id: 'ORD-001', customerName: 'Liam Johnson', customerEmail: 'liam@example.com', date: '2023-10-23', status: 'Fulfilled', total: 250.00 },
-    { id: 'ORD-002', customerName: 'Olivia Smith', customerEmail: 'olivia@example.com', date: '2023-10-24', status: 'Fulfilled', total: 150.00 },
-    { id: 'ORD-003', customerName: 'Noah Williams', customerEmail: 'noah@example.com', date: '2023-10-25', status: 'Unfulfilled', total: 350.00 },
-    { id: 'ORD-004', customerName: 'Emma Brown', customerEmail: 'emma@example.com', date: '2023-10-26', status: 'Fulfilled', total: 450.00 },
-    { id: 'ORD-005', customerName: 'Ava Jones', customerEmail: 'ava@example.com', date: '2023-10-27', status: 'Refunded', total: 550.00 },
-    { id: 'ORD-006', customerName: 'Lucas Garcia', customerEmail: 'lucas@example.com', date: '2023-10-28', status: 'Unfulfilled', total: 50.00 },
-    { id: 'ORD-007', customerName: 'Sophia Miller', customerEmail: 'sophia@example.com', date: '2023-10-29', status: 'Fulfilled', total: 120.50 },
-];
-
-export const customers: Customer[] = [
-    { id: 'cust-001', name: 'Liam Johnson', email: 'liam@example.com', totalSpent: 1250, orders: 5 },
-    { id: 'cust-002', name: 'Olivia Smith', email: 'olivia@example.com', totalSpent: 850, orders: 3 },
-    { id: 'cust-003', name: 'Noah Williams', email: 'noah@example.com', totalSpent: 2350, orders: 8 },
-    { id: 'cust-004', name: 'Emma Brown', email: 'emma@example.com', totalSpent: 4500, orders: 12 },
-    { id: 'cust-005', name: 'Ava Jones', email: 'ava@example.com', totalSpent: 550, orders: 2 },
-    { id: 'cust-006', name: 'Lucas Garcia', email: 'lucas@example.com', totalSpent: 300, orders: 4 },
-    { id: 'cust-007', name: 'Sophia Miller', email: 'sophia@example.com', totalSpent: 1720, orders: 6 },
-];
 
 export const exampleProductData = {
     "product_id": "KC12345",

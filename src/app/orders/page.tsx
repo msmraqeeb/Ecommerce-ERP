@@ -26,17 +26,22 @@ import {
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MoreHorizontal, File } from 'lucide-react';
-import { orders } from '@/lib/data';
+import { getOrders } from '@/lib/woocommerce';
+import type { Order } from '@/lib/types';
 import { format } from 'date-fns';
 
-export default function OrdersPage() {
+export default async function OrdersPage() {
+  const orders: Order[] = await getOrders();
+
   const getBadgeVariant = (status: string) => {
     switch (status) {
-      case 'Fulfilled':
+      case 'completed':
         return 'default';
-      case 'Unfulfilled':
+      case 'processing':
         return 'secondary';
-      case 'Refunded':
+      case 'refunded':
+      case 'failed':
+      case 'cancelled':
         return 'destructive';
       default:
         return 'outline';
@@ -49,8 +54,8 @@ export default function OrdersPage() {
         <div className="flex items-center">
           <TabsList>
             <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="unfulfilled">Unfulfilled</TabsTrigger>
-            <TabsTrigger value="fulfilled">Fulfilled</TabsTrigger>
+            <TabsTrigger value="processing">Processing</TabsTrigger>
+            <TabsTrigger value="completed">Completed</TabsTrigger>
             <TabsTrigger value="refunded" className="hidden sm:flex">Refunded</TabsTrigger>
           </TabsList>
           <div className="ml-auto flex items-center gap-2">
@@ -75,7 +80,7 @@ export default function OrdersPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="hidden w-[100px] sm:table-cell">
-                      <span className="sr-only">Order</span>
+                      Order
                     </TableHead>
                     <TableHead>Customer</TableHead>
                     <TableHead>Status</TableHead>
@@ -89,11 +94,11 @@ export default function OrdersPage() {
                 <TableBody>
                   {orders.map((order) => (
                     <TableRow key={order.id}>
-                      <TableCell className="hidden sm:table-cell font-medium">{order.id}</TableCell>
+                      <TableCell className="hidden sm:table-cell font-medium">#{order.id}</TableCell>
                       <TableCell>
-                        <div className="font-medium">{order.customerName}</div>
+                        <div className="font-medium">{order.billing.first_name} {order.billing.last_name}</div>
                         <div className="hidden text-sm text-muted-foreground md:inline">
-                          {order.customerEmail}
+                          {order.billing.email}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -102,10 +107,10 @@ export default function OrdersPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="hidden md:table-cell">
-                        {format(new Date(order.date), 'MMMM dd, yyyy')}
+                        {format(new Date(order.date_created), 'MMMM dd, yyyy')}
                       </TableCell>
                       <TableCell className="text-right">
-                        ${order.total.toFixed(2)}
+                        ${order.total}
                       </TableCell>
                        <TableCell>
                         <DropdownMenu>
@@ -137,7 +142,7 @@ export default function OrdersPage() {
             </CardContent>
              <CardFooter>
               <div className="text-xs text-muted-foreground">
-                Showing <strong>1-7</strong> of <strong>7</strong> orders
+                Showing <strong>1-{orders.length}</strong> of <strong>{orders.length}</strong> orders
               </div>
             </CardFooter>
           </Card>

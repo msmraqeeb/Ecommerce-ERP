@@ -24,9 +24,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal } from 'lucide-react';
-import { customers } from '@/lib/data';
+import { getCustomers } from '@/lib/woocommerce';
+import type { Customer } from '@/lib/types';
 
-export default function CustomersPage() {
+export default async function CustomersPage() {
+    const customers: Customer[] = await getCustomers();
+
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <Card>
@@ -53,11 +56,11 @@ export default function CustomersPage() {
               {customers.map((customer) => (
                 <TableRow key={customer.id}>
                   <TableCell>
-                    <div className="font-medium">{customer.name}</div>
+                    <div className="font-medium">{customer.first_name} {customer.last_name}</div>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">{customer.email}</TableCell>
-                  <TableCell className="hidden sm:table-cell">{customer.orders}</TableCell>
-                  <TableCell className="text-right">${customer.totalSpent.toFixed(2)}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{customer.orders_count}</TableCell>
+                  <TableCell className="text-right">${customer.total_spent}</TableCell>
                    <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -84,7 +87,7 @@ export default function CustomersPage() {
         </CardContent>
         <CardFooter>
           <div className="text-xs text-muted-foreground">
-            Showing <strong>1-7</strong> of <strong>7</strong> customers
+            Showing <strong>1-{customers.length}</strong> of <strong>{customers.length}</strong> customers
           </div>
         </CardFooter>
       </Card>
