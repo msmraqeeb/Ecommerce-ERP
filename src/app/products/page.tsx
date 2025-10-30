@@ -26,7 +26,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MoreHorizontal, PlusCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getProducts, getProductCounts } from "@/lib/woocommerce";
 import type { Product } from "@/lib/types";
@@ -44,7 +44,7 @@ export default async function ProductsPage({
   const currentPage = Number(searchParams?.page) || 1;
   const currentStatus = searchParams?.status || 'any';
   
-  const { products, totalPages, totalProducts } = await getProducts(currentPage, currentStatus === 'any' ? undefined : currentStatus);
+  const { products, totalPages, totalProducts } = await getProducts(currentPage, currentStatus);
   const counts = await getProductCounts();
 
   const getStatusBadge = (status: 'instock' | 'outofstock' | 'onbackorder' | 'publish' | 'draft') => {
@@ -78,7 +78,30 @@ export default async function ProductsPage({
 
   const tabValues: ProductStatus[] = ['any', 'publish', 'draft'];
 
-  const renderContent = () => (
+  return (
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+       <div className="flex items-center">
+        <Tabs value={currentStatus}>
+          <TabsList>
+            {tabValues.map(status => (
+              <Link href={{ pathname: '/products', query: { status: status === 'any' ? undefined : status } }} key={status} passHref>
+                <TabsTrigger value={status} className="cursor-pointer">
+                  {status.charAt(0).toUpperCase() + status.slice(1)} ({getStatusCount(status)})
+                </TabsTrigger>
+              </Link>
+            ))}
+          </TabsList>
+        </Tabs>
+        <div className="ml-auto flex items-center gap-2">
+            <Button size="sm" className="h-8 gap-1">
+              <PlusCircle className="h-3.5 w-3.5" />
+              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                Add Product
+              </span>
+            </Button>
+          </div>
+        </div>
+
       <Card>
         <CardHeader>
           <CardTitle className="font-headline">Products</CardTitle>
@@ -165,36 +188,6 @@ export default async function ProductsPage({
           </div>
         </CardFooter>
       </Card>
-  );
-
-  return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-       <Tabs value={currentStatus}>
-        <div className="flex items-center">
-          <TabsList>
-            {tabValues.map(status => (
-              <Link href={{ pathname: '/products', query: { status: status === 'any' ? undefined : status, page: 1 } }} key={status} passHref>
-                <TabsTrigger value={status}>
-                  {status.charAt(0).toUpperCase() + status.slice(1)} ({getStatusCount(status)})
-                </TabsTrigger>
-              </Link>
-            ))}
-          </TabsList>
-          <div className="ml-auto flex items-center gap-2">
-            <Button size="sm" className="h-8 gap-1">
-              <PlusCircle className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Add Product
-              </span>
-            </Button>
-          </div>
-        </div>
-        {tabValues.map(status => (
-          <TabsContent key={status} value={status}>
-            {renderContent()}
-          </TabsContent>
-        ))}
-      </Tabs>
     </div>
   );
 }
