@@ -21,15 +21,22 @@ const api = new WooCommerceRestApi({
   }
 });
 
-export async function getProducts() {
+export async function getProducts(page = 1) {
   try {
     const response = await api.get("products", {
-        per_page: 100,
+        per_page: 20,
+        page: page,
     });
-    return response.data;
+    return {
+      products: response.data,
+      totalPages: response.headers['x-wp-totalpages']
+    };
   } catch (error) {
     console.error("Error fetching products:", error);
-    return [];
+    return {
+      products: [],
+      totalPages: 0
+    };
   }
 }
 

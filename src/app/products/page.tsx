@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -26,12 +27,19 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { MoreHorizontal, PlusCircle } from 'lucide-react';
+import { MoreHorizontal, PlusCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getProducts } from "@/lib/woocommerce";
 import type { Product } from "@/lib/types";
 
-export default async function ProductsPage() {
-  const products: Product[] = await getProducts();
+export default async function ProductsPage({
+  searchParams
+}: {
+  searchParams?: {
+    page?: string;
+  }
+}) {
+  const currentPage = Number(searchParams?.page) || 1;
+  const { products, totalPages } = await getProducts(currentPage);
 
   const getStatusBadge = (status: 'instock' | 'outofstock' | 'onbackorder') => {
     switch (status) {
@@ -43,6 +51,9 @@ export default async function ProductsPage() {
         return <Badge variant="destructive">Out of Stock</Badge>;
     }
   };
+
+  const hasNextPage = currentPage < totalPages;
+  const hasPrevPage = currentPage > 1;
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -132,7 +143,21 @@ export default async function ProductsPage() {
             </CardContent>
             <CardFooter>
               <div className="text-xs text-muted-foreground">
-                Showing <strong>1-{products.length}</strong> of <strong>{products.length}</strong> products
+                Page {currentPage} of {totalPages}
+              </div>
+              <div className="ml-auto flex items-center gap-2">
+                <Button asChild variant="outline" size="sm" disabled={!hasPrevPage}>
+                  <Link href={{ pathname: '/products', query: { page: currentPage - 1 } }}>
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="sr-only">Previous</span>
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" disabled={!hasNextPage}>
+                   <Link href={{ pathname: '/products', query: { page: currentPage + 1 } }}>
+                    <span className="sr-only">Next</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </Button>
               </div>
             </CardFooter>
           </Card>
