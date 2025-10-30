@@ -1,13 +1,19 @@
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
 
-if (!process.env.WOOCOMMERCE_API_URL || !process.env.WOOCOMMERCE_CONSUMER_KEY || !process.env.WOOCOMMERCE_CONSUMER_SECRET) {
-    console.warn("WooCommerce API credentials are not set. Please check your .env.local file.");
+// Ensure environment variables are loaded and available.
+// If any of these are missing, we should fail early and loud.
+const wooCommerceApiUrl = process.env.WOOCOMMERCE_API_URL;
+const wooCommerceConsumerKey = process.env.WOOCOMMERCE_CONSUMER_KEY;
+const wooCommerceConsumerSecret = process.env.WOOCOMMERCE_CONSUMER_SECRET;
+
+if (!wooCommerceApiUrl || !wooCommerceConsumerKey || !wooCommerceConsumerSecret) {
+    throw new Error("WooCommerce API credentials are not set. Please check your .env.local file.");
 }
 
 const api = new WooCommerceRestApi({
-  url: process.env.WOOCOMMERCE_API_URL!,
-  consumerKey: process.env.WOOCOMMERCE_CONSUMER_KEY!,
-  consumerSecret: process.env.WOOCOMMERCE_CONSUMER_SECRET!,
+  url: wooCommerceApiUrl,
+  consumerKey: wooCommerceConsumerKey,
+  consumerSecret: wooCommerceConsumerSecret,
   version: "wc/v3",
   axiosConfig: {
     headers: {
