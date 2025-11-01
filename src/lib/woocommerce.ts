@@ -35,20 +35,12 @@ export async function getProducts({
   search
 }: GetProductsParams = {}) {
   try {
-    const params: { 
-        per_page: number; 
-        page: number; 
-        status?: 'publish' | 'draft' | 'pending' | 'private';
-        stock_status?: string;
-        orderby?: string;
-        order?: string;
-        search?: string;
-    } = {
+    const params: any = {
         per_page: 20,
         page: page,
     };
 
-    if (status === 'publish' || status === 'draft' || status === 'pending' || status === 'private') {
+    if (status && status !== 'all') {
         params.status = status;
     }
 

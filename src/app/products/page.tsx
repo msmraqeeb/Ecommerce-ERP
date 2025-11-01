@@ -104,8 +104,15 @@ export default async function ProductsPage({
     // Clean up query params
     if (query.status === 'all') delete query.status;
     if (!query.page || query.page === '1') delete query.page;
-    if ('search' in newParams) query.page = undefined; // Reset page on new search
-    if(search === '') delete query.search;
+    if ('search' in newParams && newParams.search) {
+      query.page = undefined; // Reset page on new search
+    } else if ('search' in newParams && !newParams.search) {
+      delete query.search;
+    }
+    
+    if (query.search === '') {
+      delete query.search;
+    }
 
 
     return query;
