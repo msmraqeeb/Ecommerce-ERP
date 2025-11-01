@@ -123,15 +123,9 @@ export function ProductsPageContent({
   };
 
   React.useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (query) {
-      params.set('search', query);
-      params.delete('page');
-    } else {
-      params.delete('search');
-    }
-    router.push(`/products?${params.toString()}`);
-  }, [query, router, searchParams]);
+    const queryString = buildQueryString({ search: query || undefined, page: undefined });
+    router.push(`/products?${queryString}`);
+  }, [query, router]);
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
