@@ -126,6 +126,11 @@ export default async function ProductsPage({
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Filter by</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuLabel className="font-normal text-xs">Status</DropdownMenuLabel>
+                 <DropdownMenuItem asChild><Link className="w-full" href={{ pathname: '/products', query: buildQuery({ status: 'all', page: undefined }) }}>All</Link></DropdownMenuItem>
+                 <DropdownMenuItem asChild><Link className="w-full" href={{ pathname: '/products', query: buildQuery({ status: 'publish', page: undefined }) }}>Published</Link></DropdownMenuItem>
+                 <DropdownMenuItem asChild><Link className="w-full" href={{ pathname: '/products', query: buildQuery({ status: 'draft', page: undefined }) }}>Draft</Link></DropdownMenuItem>
+                <DropdownMenuSeparator />
                  <DropdownMenuLabel className="font-normal text-xs">Stock Status</DropdownMenuLabel>
                  <DropdownMenuItem asChild><Link className="w-full" href={{ pathname: '/products', query: buildQuery({ stock_status: undefined }) }}>All</Link></DropdownMenuItem>
                  <DropdownMenuItem asChild><Link className="w-full" href={{ pathname: '/products', query: buildQuery({ stock_status: 'instock' }) }}>In Stock</Link></DropdownMenuItem>
