@@ -39,12 +39,11 @@ export async function getProducts({
     const params: any = {
       per_page: 20,
       page,
+      status: 'any', // Default to 'any' to allow search across all statuses
     };
 
     if (status && status !== 'all' && status !== 'any') {
       params.status = status;
-    } else {
-      params.status = 'any';
     }
 
     if (stock_status) {
