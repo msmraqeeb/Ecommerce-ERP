@@ -22,10 +22,39 @@ export type Order = {
     first_name: string;
     last_name: string;
     email: string;
+    address_1: string;
+    address_2: string;
+    city: string;
+    state: string;
+    postcode: string;
+    country: string;
+    phone: string;
   };
+  shipping: {
+    first_name: string;
+    last_name: string;
+    address_1: string;
+    address_2: string;
+    city: string;
+    state: string;
+    postcode: string;
+    country: string;
+  },
+  line_items: {
+      id: number;
+      name: string;
+      product_id: number;
+      quantity: number;
+      price: number;
+      total: string;
+      sku: string;
+  }[],
   date_created: string;
   status: 'pending' | 'processing' | 'on-hold' | 'completed' | 'cancelled' | 'refunded' | 'failed';
   total: string;
+  currency: string;
+  shipping_total: string;
+  payment_method_title: string;
 };
 
 export type Customer = {

@@ -1,5 +1,5 @@
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
-import type { Product, ProductStatus, OrderStatus, Customer } from "@/lib/types";
+import type { Product, ProductStatus, OrderStatus, Customer, Order } from "@/lib/types";
 
 const wooCommerceApiUrl = process.env.NEXT_PUBLIC_WOOCOMMERCE_API_URL;
 const wooCommerceConsumerKey = process.env.NEXT_PUBLIC_WOOCOMMERCE_CONSUMER_KEY;
@@ -49,62 +49,24 @@ export async function getProducts({
     const params: any = {
       per_page: 20,
       page,
+      status: 'any',
     };
 
     if (status && status !== 'all' && status !== 'any') {
       params.status = status;
-    } else {
-      params.status = 'any';
     }
-
+    
     if (stock_status) params.stock_status = stock_status;
     if (orderby) params.orderby = orderby;
     if (order) params.order = order;
-    
-    let combinedProducts: Product[] = [];
-    let totalProductsHeader = '0';
-    let totalPagesHeader = '0';
-    
-    if (search) {
-      // Primary search by general term (name, desc)
-      const searchResponse = await api.get("products", { ...params, search: search });
-      if (searchResponse.data) {
-        combinedProducts = combinedProducts.concat(searchResponse.data);
-      }
-      
-      // Secondary search specifically by SKU
-      const skuResponse = await api.get("products", { ...params, sku: search });
-      if (skuResponse.data) {
-         combinedProducts = combinedProducts.concat(skuResponse.data);
-      }
+    if (search) params.search = search;
 
-      // Remove duplicates
-      const uniqueIds = new Set();
-      combinedProducts = combinedProducts.filter(product => {
-        if (uniqueIds.has(product.id)) {
-          return false;
-        } else {
-          uniqueIds.add(product.id);
-          return true;
-        }
-      });
-      
-      // Since we are combining results, the pagination headers from a single API call are not accurate.
-      // We'll set them based on the combined results.
-      totalProductsHeader = String(combinedProducts.length);
-      totalPagesHeader = "1"; // We are showing all results on one page for now. A more complex pagination would be needed for large result sets.
-
-    } else {
-       const response = await api.get("products", params);
-       combinedProducts = response.data;
-       totalPagesHeader = response.headers['x-wp-totalpages'];
-       totalProductsHeader = response.headers['x-wp-total'];
-    }
+    const response = await api.get("products", params);
 
     return {
-      products: combinedProducts,
-      totalPages: Number(totalPagesHeader),
-      totalProducts: Number(totalProductsHeader),
+      products: response.data,
+      totalPages: Number(response.headers['x-wp-totalpages']),
+      totalProducts: Number(response.headers['x-wp-total']),
     };
 
   } catch (error) {
@@ -203,3 +165,13 @@ export async function getOrders(status: OrderStatus = 'any', dateRange?: { after
       return [];
     }
   }
+
+export async function getOrderById(id: number): Promise<Order | null> {
+  try {
+    const response = await api.get(`orders/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching order with ID ${id}:`, error);
+    return null;
+  }
+}

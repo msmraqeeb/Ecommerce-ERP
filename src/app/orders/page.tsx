@@ -29,6 +29,7 @@ import { MoreHorizontal, File } from 'lucide-react';
 import { getOrders } from '@/lib/woocommerce';
 import type { Order } from '@/lib/types';
 import { format } from 'date-fns';
+import Link from 'next/link';
 
 const getBadgeVariant = (status: string) => {
   switch (status) {
@@ -104,8 +105,12 @@ const OrderTable = ({ orders }: { orders: Order[] }) => (
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem>View Details</DropdownMenuItem>
-                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/orders/${order.id}`}>View Details</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/orders/${order.id}/edit`}>Edit</Link>
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="text-destructive">
                       Delete
