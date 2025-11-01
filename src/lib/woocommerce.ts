@@ -1,15 +1,16 @@
+import 'dotenv/config';
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
 import type { Product, ProductStatus, OrderStatus, Customer, Order } from "@/lib/types";
 
-const wooCommerceApiUrl = process.env.NEXT_PUBLIC_WOOCOMMERCE_API_URL;
-const wooCommerceConsumerKey = process.env.NEXT_PUBLIC_WOOCOMMERCE_CONSUMER_KEY;
-const wooCommerceConsumerSecret = process.env.NEXT_PUBLIC_WOOCOMMERCE_CONSUMER_SECRET;
+const wooCommerceApiUrl = process.env.WOOCOMMERCE_API_URL;
+const wooCommerceConsumerKey = process.env.WOOCOMMERCE_CONSUMER_KEY;
+const wooCommerceConsumerSecret = process.env.WOOCOMMERCE_CONSUMER_SECRET;
 
 if (!wooCommerceApiUrl || !wooCommerceConsumerKey || !wooCommerceConsumerSecret) {
-    throw new Error("WooCommerce API credentials are not set. Please check your .env.local file and ensure they use the NEXT_PUBLIC_prefix.");
+    throw new Error("WooCommerce API credentials are not set. Please check your environment variables.");
 }
 
-const api = new WooCommerceRestApi({
+export const api = new WooCommerceRestApi({
   url: wooCommerceApiUrl,
   consumerKey: wooCommerceConsumerKey,
   consumerSecret: wooCommerceConsumerSecret,
