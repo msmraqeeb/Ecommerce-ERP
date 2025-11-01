@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import MainLayout from '@/components/layout/main-layout';
+import { getSession } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
   title: 'KP ERP',
@@ -9,11 +11,19 @@ export const metadata: Metadata = {
   icons: [{ rel: 'icon', url: '/favicon.ico' }],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const session = await getSession();
+
+  // If there's a session, we pass the user to the layout, otherwise it's null.
+  // The MainLayout will only be rendered for authenticated users, handled by middleware.
+  // We provide a fallback for the login page which doesn't use MainLayout.
+  const user = session?.user || null;
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -29,7 +39,7 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <MainLayout>{children}</MainLayout>
+        {user ? <MainLayout user={user}>{children}</MainLayout> : children}
         <Toaster />
       </body>
     </html>

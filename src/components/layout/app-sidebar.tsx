@@ -23,18 +23,22 @@ import {
   LogOut,
   Menu,
 } from 'lucide-react';
+import { logout } from '@/lib/auth';
+import type { User } from '@/lib/types';
 
 const navItems = [
-  { href: '/', icon: Home, label: 'Overview' },
-  { href: '/orders', icon: ShoppingCart, label: 'Orders' },
-  { href: '/products', icon: Package, label: 'Products' },
-  { href: '/customers', icon: Users, label: 'Customers' },
-  { href: '/data-sync', icon: GitCompareArrows, label: 'Data Sync' },
+  { href: '/', icon: Home, label: 'Overview', roles: ['admin', 'viewer'] },
+  { href: '/orders', icon: ShoppingCart, label: 'Orders', roles: ['admin', 'viewer'] },
+  { href: '/products', icon: Package, label: 'Products', roles: ['admin', 'viewer'] },
+  { href: '/customers', icon: Users, label: 'Customers', roles: ['admin', 'viewer'] },
+  { href: '/data-sync', icon: GitCompareArrows, label: 'Data Sync', roles: ['admin'] },
 ];
 
-export function AppSidebar() {
+export function AppSidebar({ user }: { user: User | null }) {
   const pathname = usePathname();
   const { isMobile, setOpenMobile } = useSidebar();
+
+  const filteredNavItems = navItems.filter(item => user && item.roles.includes(user.role));
 
   return (
     <>
@@ -58,7 +62,7 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent className="p-2">
         <SidebarMenu>
-          {navItems.map((item) => (
+          {filteredNavItems.map((item) => (
             <SidebarMenuItem key={item.href}>
               <Button
                 asChild
@@ -75,10 +79,12 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="p-2">
-        <Button variant="ghost" className="w-full justify-start">
-          <LogOut className="mr-2 h-4 w-4" />
-          Logout
-        </Button>
+        <form action={logout}>
+            <Button type="submit" variant="ghost" className="w-full justify-start">
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+            </Button>
+        </form>
       </SidebarFooter>
     </>
   );

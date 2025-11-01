@@ -2,10 +2,11 @@ import React from 'react';
 import type { ProductStatus } from '@/lib/types';
 import { getProducts, getProductCounts } from '@/lib/woocommerce';
 import { ProductsPageContent } from './products-client-page';
+import { getSession } from '@/lib/auth';
 
 type StockStatus = 'instock' | 'outofstock' | 'onbackorder';
 
-export default function ProductsPage({
+export default async function ProductsPage({
   searchParams,
 }: {
   searchParams?: {
@@ -17,15 +18,18 @@ export default function ProductsPage({
     search?: string;
   };
 }) {
+  const session = await getSession();
+  const isAdmin = session?.user?.role === 'admin';
   return (
     <React.Suspense fallback={<div className="p-8">Loading...</div>}>
-      <ProductsDataFetcher searchParams={searchParams} />
+      <ProductsDataFetcher searchParams={searchParams} isAdmin={isAdmin} />
     </React.Suspense>
   );
 }
 
 async function ProductsDataFetcher({
   searchParams,
+  isAdmin
 }: {
   searchParams?: {
     page?: string;
@@ -35,6 +39,7 @@ async function ProductsDataFetcher({
     order?: 'asc' | 'desc';
     search?: string;
   };
+  isAdmin: boolean;
 }) {
   const currentPage = Number(searchParams?.page) || 1;
   const currentStatus = searchParams?.status || 'all';
@@ -59,6 +64,7 @@ async function ProductsDataFetcher({
       totalPages={totalPages}
       totalProducts={totalProducts}
       counts={counts}
+      isAdmin={isAdmin}
     />
   );
 }

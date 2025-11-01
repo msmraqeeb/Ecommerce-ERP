@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Edit } from 'lucide-react';
 import type { Order } from '@/lib/types';
+import { getSession } from '@/lib/auth';
 
 const getBadgeVariant = (status: string) => {
   switch (status) {
@@ -50,6 +51,8 @@ export default async function OrderDetailsPage({
   }
 
   const order: Order | null = await getOrderById(orderId);
+  const session = await getSession();
+  const isAdmin = session?.user?.role === 'admin';
 
   if (!order) {
     notFound();
@@ -91,14 +94,16 @@ export default async function OrderDetailsPage({
             <Badge variant={getBadgeVariant(status)} className="capitalize text-base py-1 px-3">
               {status}
             </Badge>
-            <Button asChild size="sm" className="h-8 gap-1">
-              <Link href={`/orders/${id}/edit`}>
-                <Edit className="h-3.5 w-3.5" />
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                  Edit Status
-                </span>
-              </Link>
-            </Button>
+            {isAdmin && (
+                <Button asChild size="sm" className="h-8 gap-1">
+                <Link href={`/orders/${id}/edit`}>
+                    <Edit className="h-3.5 w-3.5" />
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                    Edit Status
+                    </span>
+                </Link>
+                </Button>
+            )}
         </div>
       </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

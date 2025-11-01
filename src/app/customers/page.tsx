@@ -26,9 +26,12 @@ import { Button } from '@/components/ui/button';
 import { MoreHorizontal } from 'lucide-react';
 import { getCustomers } from '@/lib/woocommerce';
 import type { Customer } from '@/lib/types';
+import { getSession } from '@/lib/auth';
 
 export default async function CustomersPage() {
     const customers: Customer[] = await getCustomers();
+    const session = await getSession();
+    const isAdmin = session?.user?.role === 'admin';
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -73,10 +76,14 @@ export default async function CustomersPage() {
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem>View Profile</DropdownMenuItem>
                         <DropdownMenuItem>View Orders</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive">
-                          Delete
-                        </DropdownMenuItem>
+                        {isAdmin && (
+                            <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className="text-destructive">
+                                Delete
+                                </DropdownMenuItem>
+                            </>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

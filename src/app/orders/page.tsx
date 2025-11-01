@@ -30,6 +30,7 @@ import { getOrders } from '@/lib/woocommerce';
 import type { Order } from '@/lib/types';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { getSession } from '@/lib/auth';
 
 const getBadgeVariant = (status: string) => {
   switch (status) {
@@ -46,7 +47,7 @@ const getBadgeVariant = (status: string) => {
   }
 };
 
-const OrderTable = ({ orders }: { orders: Order[] }) => (
+const OrderTable = ({ orders, isAdmin }: { orders: Order[], isAdmin: boolean }) => (
   <Card>
     <CardHeader>
       <CardTitle className="font-headline">Orders</CardTitle>
@@ -108,13 +109,17 @@ const OrderTable = ({ orders }: { orders: Order[] }) => (
                     <DropdownMenuItem asChild>
                       <Link href={`/orders/${order.id}`}>View Details</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/orders/${order.id}/edit`}>Edit</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-destructive">
-                      Delete
-                    </DropdownMenuItem>
+                    {isAdmin && (
+                        <>
+                            <DropdownMenuItem asChild>
+                            <Link href={`/orders/${order.id}/edit`}>Edit</Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-destructive">
+                            Delete
+                            </DropdownMenuItem>
+                        </>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
@@ -136,6 +141,9 @@ export default async function OrdersPage() {
   const processingOrders = await getOrders('processing');
   const completedOrders = await getOrders('completed');
   const refundedOrders = await getOrders('refunded');
+  const session = await getSession();
+  const isAdmin = session?.user?.role === 'admin';
+
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -147,26 +155,28 @@ export default async function OrdersPage() {
             <TabsTrigger value="completed">Completed</TabsTrigger>
             <TabsTrigger value="refunded" className="hidden sm:flex">Refunded</TabsTrigger>
           </TabsList>
-          <div className="ml-auto flex items-center gap-2">
-            <Button size="sm" variant="outline" className="h-8 gap-1">
-              <File className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Export
-              </span>
-            </Button>
-          </div>
+          {isAdmin && (
+            <div className="ml-auto flex items-center gap-2">
+                <Button size="sm" variant="outline" className="h-8 gap-1">
+                <File className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                    Export
+                </span>
+                </Button>
+            </div>
+          )}
         </div>
         <TabsContent value="all">
-          <OrderTable orders={allOrders} />
+          <OrderTable orders={allOrders} isAdmin={isAdmin} />
         </TabsContent>
         <TabsContent value="processing">
-          <OrderTable orders={processingOrders} />
+          <OrderTable orders={processingOrders} isAdmin={isAdmin} />
         </TabsContent>
         <TabsContent value="completed">
-          <OrderTable orders={completedOrders} />
+          <OrderTable orders={completedOrders} isAdmin={isAdmin} />
         </TabsContent>
         <TabsContent value="refunded">
-          <OrderTable orders={refundedOrders} />
+          <OrderTable orders={refundedOrders} isAdmin={isAdmin} />
         </TabsContent>
       </Tabs>
     </div>

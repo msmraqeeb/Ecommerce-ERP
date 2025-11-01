@@ -53,11 +53,13 @@ export function ProductsPageContent({
   totalPages,
   totalProducts,
   counts,
+  isAdmin,
 }: {
   products: Product[];
   totalPages: number;
   totalProducts: number;
   counts: { all: number; published: number; draft: number };
+  isAdmin: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -301,22 +303,26 @@ export function ProductsPageContent({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button size="sm" variant="outline" className="h-10 gap-1" onClick={handleExport} disabled={isExporting}>
-            {isExporting ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <File className="h-3.5 w-3.5" />
-            )}
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-              {isExporting ? 'Exporting...' : 'Export'}
-            </span>
-          </Button>
-          <Button size="sm" className="h-10 gap-1">
-            <PlusCircle className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-              Add Product
-            </span>
-          </Button>
+          {isAdmin && (
+            <>
+            <Button size="sm" variant="outline" className="h-10 gap-1" onClick={handleExport} disabled={isExporting}>
+                {isExporting ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                <File className="h-3.5 w-3.5" />
+                )}
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                {isExporting ? 'Exporting...' : 'Export'}
+                </span>
+            </Button>
+            <Button size="sm" className="h-10 gap-1">
+                <PlusCircle className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                Add Product
+                </span>
+            </Button>
+            </>
+          )}
         </div>
       </div>
       <Card>
@@ -384,14 +390,19 @@ export function ProductsPageContent({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/products/${product.id}/edit`}>Edit</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive">
-                          Delete
-                        </DropdownMenuItem>
+                        {isAdmin && (
+                            <>
+                            <DropdownMenuItem asChild>
+                            <Link href={`/products/${product.id}/edit`}>Edit</Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-destructive">
+                            Delete
+                            </DropdownMenuItem>
+                            </>
+                        )}
+                        {!isAdmin && <DropdownMenuItem asChild><Link href={`/products/${product.id}/edit`}>View</Link></DropdownMenuItem>}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

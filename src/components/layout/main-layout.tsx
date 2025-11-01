@@ -8,16 +8,20 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar';
 import { AppSidebar } from './app-sidebar';
+import type { User } from '@/lib/types';
+
 
 export default function MainLayout({
   children,
+  user,
 }: {
   children: React.ReactNode;
+  user: User | null;
 }) {
   return (
     <SidebarProvider>
       <Sidebar>
-        <AppSidebar />
+        <AppSidebar user={user} />
         <SidebarRail />
       </Sidebar>
       <SidebarInset>

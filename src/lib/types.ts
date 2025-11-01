@@ -11,7 +11,7 @@ export type Product = {
   status: 'publish' | 'draft' | 'pending' | 'private';
   price: string;
   total_sales: number;
-  stock_quantity: number;
+  stock_quantity: number | null;
 };
 
 export type OrderStatus = 'any' | 'pending' | 'processing' | 'on-hold' | 'completed' | 'cancelled' | 'refunded' | 'failed';
@@ -65,3 +65,9 @@ export type Customer = {
   total_spent: string;
   orders_count: number;
 };
+
+export type User = {
+  id: number;
+  username: string;
+  role: 'admin' | 'viewer';
+}

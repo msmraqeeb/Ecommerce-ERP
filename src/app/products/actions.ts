@@ -3,7 +3,7 @@ import 'dotenv/config';
 import { api } from '@/lib/woocommerce';
 import { getProductBySKU } from '@/lib/woocommerce';
 import type { Product } from '@/lib/types';
-
+import { isAdmin } from '@/lib/auth';
 
 export async function getProductById(id: number): Promise<Product | null> {
   try {
@@ -50,16 +50,22 @@ export async function getAllProductsForExport() {
 }
 
 export async function updateProduct(id: number, data: any) {
+    if (!await isAdmin()) {
+        return { success: false, error: 'Unauthorized' };
+    }
   try {
     const response = await api.put(`products/${id}`, data);
     return { success: true, data: response.data };
   } catch (error: any) {
-    console.error('Error updating product:', error.response.data);
-    return { success: false, error: error.response.data.message || 'Failed to update product.' };
+    console.error('Error updating product:', error.response?.data);
+    return { success: false, error: error.response?.data?.message || 'Failed to update product.' };
   }
 }
 
-export async function updateProductFromSync(identifier: string, correctedData: any) {
+export async function updateProductFromSync(identifier: string | number, correctedData: any) {
+    if (!await isAdmin()) {
+        return { success: false, error: 'Unauthorized' };
+    }
   try {
     // The AI might return various keys. We need to map them to what WooCommerce expects.
     const wooData: { [key: string]: any } = {};
@@ -73,19 +79,28 @@ export async function updateProductFromSync(identifier: string, correctedData: a
 
     // Find the product ID. The identifier could be the ID or SKU.
     let productId: number | null = null;
+    
+    if (typeof identifier === 'string') {
+        const productsBySku = await getProductBySKU(identifier);
+        if (productsBySku && productsBySku.length > 0) {
+            productId = productsBySku[0].id;
+        }
+    } else if (typeof identifier === 'number') {
+        productId = identifier;
+    }
 
-    // First, try to find the product by SKU. This is more reliable.
-    const productsBySku = await getProductBySKU(identifier);
-    if (productsBySku && productsBySku.length > 0) {
-        productId = productsBySku[0].id;
-    } else if (!isNaN(Number(identifier))) {
-        // If not found by SKU, and if the identifier is a number, assume it's the product ID.
-        // A more robust solution might check if the product exists by ID first.
-        productId = Number(identifier);
+
+    if (!productId) {
+        // Try to get it from the correctedData as a fallback
+        const idFromData = correctedData.id || correctedData.product_id;
+        if(idFromData) {
+            const product = await getProductById(idFromData);
+            if(product) productId = product.id;
+        }
     }
 
     if (!productId) {
-        throw new Error(`Product with SKU or ID '${identifier}' not found.`);
+        throw new Error(`Product with identifier '${identifier}' not found.`);
     }
     
     const response = await api.put(`products/${productId}`, wooData);

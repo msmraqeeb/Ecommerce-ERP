@@ -41,14 +41,12 @@ export default function DataSyncPage() {
       if (!output.isDataCorrect) {
         try {
             const correctedData = JSON.parse(output.correctedProductData);
-            const productId = correctedData.product_id || correctedData.sku; // Assuming ID or SKU is present
+            const productId = correctedData.product_id || correctedData.sku || correctedData.id; 
             
             if (!productId) {
                 throw new Error("Product ID or SKU not found in corrected data.");
             }
-
-            // The AI might return the ID as a string, but the update function needs a number if it's the ID.
-            // We'll try to find the product by SKU first, which is more robust.
+            
             const updateResult = await updateProductFromSync(productId, correctedData);
 
             if (updateResult.success) {
