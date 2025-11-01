@@ -57,25 +57,7 @@ export async function getProducts({
     }
 
     if (search) {
-      const searchResponse = await api.get("products", { ...params, search });
-      const skuResponse = await api.get("products", { ...params, sku: search });
-      
-      const combined = [...searchResponse.data, ...skuResponse.data];
-      const uniqueProducts = Array.from(new Map(combined.map(p => [p.id, p])).values());
-
-      // Since we are combining results, pagination from the API is not straightforward.
-      // We will handle pagination manually on the combined result.
-      // This approach is not perfect for very large datasets but will work for most cases.
-      const totalProducts = uniqueProducts.length;
-      const totalPages = Math.ceil(totalProducts / 20);
-      const paginatedProducts = uniqueProducts.slice((page - 1) * 20, page * 20);
-
-      // We are faking the headers as we are combining results.
-      return {
-        products: paginatedProducts,
-        totalPages: totalPages,
-        totalProducts: totalProducts
-      };
+      params.search = search;
     }
 
     const response = await api.get("products", params);
