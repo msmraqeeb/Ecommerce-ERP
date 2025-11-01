@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import * as React from 'react';
 import { useDebounce } from 'use-debounce';
+import Papa from 'papaparse';
 import {
   Card,
   CardContent,
@@ -38,11 +39,14 @@ import {
   ListFilter,
   File,
   Search,
+  Loader2,
 } from 'lucide-react';
 import type { Product, ProductStatus } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { getAllProductsForExport } from './actions';
+import { format } from 'date-fns';
 
 export function ProductsPageContent({
   products,
@@ -66,6 +70,8 @@ export function ProductsPageContent({
 
   const [text, setText] = React.useState(search);
   const [query] = useDebounce(text, 500);
+  const [isExporting, setIsExporting] = React.useState(false);
+
 
   const getStatusBadge = (
     status: Product['status'] | Product['stock_status']
@@ -128,6 +134,40 @@ export function ProductsPageContent({
     },
     [searchParams]
   );
+    
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const allProducts = await getAllProductsForExport();
+      const dataToExport = allProducts.map(p => ({
+        ID: p.id,
+        Name: p.name,
+        SKU: p.sku,
+        Status: p.status,
+        Price: p.price,
+        'Stock Status': p.stock_status,
+        'Stock Quantity': p.stock_quantity ?? 'N/A',
+      }));
+
+      const csv = Papa.unparse(dataToExport);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      const date = format(new Date(), 'yyyy-MM-dd');
+      link.setAttribute('download', `products-export-${date}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+        console.error("Failed to export products:", error);
+        // You might want to show a toast notification to the user here
+    } finally {
+        setIsExporting(false);
+    }
+  };
+
 
   React.useEffect(() => {
     router.push(`/products?${buildQueryString({ search: query })}`);
@@ -297,10 +337,14 @@ export function ProductsPageContent({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button size="sm" variant="outline" className="h-10 gap-1">
-            <File className="h-3.5 w-3.5" />
+          <Button size="sm" variant="outline" className="h-10 gap-1" onClick={handleExport} disabled={isExporting}>
+            {isExporting ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <File className="h-3.5 w-3.5" />
+            )}
             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-              Export
+              {isExporting ? 'Exporting...' : 'Export'}
             </span>
           </Button>
           <Button size="sm" className="h-10 gap-1">
