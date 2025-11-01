@@ -36,12 +36,12 @@ export async function getProducts({
 }: GetProductsParams = {}) {
   try {
     const params: any = {
-        per_page: 20,
-        page: page,
+      per_page: 20,
+      page: page,
     };
 
     if (status && status !== 'all') {
-        params.status = status;
+      params.status = status;
     }
 
     if (stock_status) {
@@ -55,13 +55,13 @@ export async function getProducts({
     if (order) {
       params.order = order;
     }
-    
+
     if (search) {
       params.search = search;
     }
 
     const response = await api.get("products", params);
-    
+
     return {
       products: response.data,
       totalPages: Number(response.headers['x-wp-totalpages']),
