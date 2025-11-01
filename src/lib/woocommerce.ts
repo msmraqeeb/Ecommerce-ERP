@@ -1,12 +1,12 @@
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
-import type { ProductStatus, OrderStatus } from "@/lib/types";
+import type { Product, ProductStatus, OrderStatus } from "@/lib/types";
 
 const wooCommerceApiUrl = process.env.NEXT_PUBLIC_WOOCOMMERCE_API_URL;
 const wooCommerceConsumerKey = process.env.NEXT_PUBLIC_WOOCOMMERCE_CONSUMER_KEY;
 const wooCommerceConsumerSecret = process.env.NEXT_PUBLIC_WOOCOMMERCE_CONSUMER_SECRET;
 
 if (!wooCommerceApiUrl || !wooCommerceConsumerKey || !wooCommerceConsumerSecret) {
-    throw new Error("WooCommerce API credentials are not set. Please check your .env.local file and ensure they use the NEXT_PUBLIC_ prefix.");
+    throw new Error("WooCommerce API credentials are not set. Please check your .env.local file and ensure they use the NEXT_PUBLIC_prefix.");
 }
 
 const api = new WooCommerceRestApi({
@@ -57,7 +57,25 @@ export async function getProducts({
     }
 
     if (search) {
-      params.search = search;
+      const searchResponse = await api.get("products", { ...params, search });
+      const skuResponse = await api.get("products", { ...params, sku: search });
+      
+      const combined = [...searchResponse.data, ...skuResponse.data];
+      const uniqueProducts = Array.from(new Map(combined.map(p => [p.id, p])).values());
+
+      // Since we are combining results, pagination from the API is not straightforward.
+      // We will handle pagination manually on the combined result.
+      // This approach is not perfect for very large datasets but will work for most cases.
+      const totalProducts = uniqueProducts.length;
+      const totalPages = Math.ceil(totalProducts / 20);
+      const paginatedProducts = uniqueProducts.slice((page - 1) * 20, page * 20);
+
+      // We are faking the headers as we are combining results.
+      return {
+        products: paginatedProducts,
+        totalPages: totalPages,
+        totalProducts: totalProducts
+      };
     }
 
     const response = await api.get("products", params);
@@ -87,8 +105,12 @@ export async function getProductCounts() {
     const publishedCount = Number(published.headers['x-wp-total']);
     const draftCount = Number(draft.headers['x-wp-total']);
 
+    const response = await api.get("products");
+    const allCount = Number(response.headers['x-wp-total']);
+
+
     return {
-      all: publishedCount + draftCount,
+      all: allCount,
       published: publishedCount,
       draft: draftCount,
     };
