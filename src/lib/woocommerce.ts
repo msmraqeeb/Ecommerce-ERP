@@ -1,5 +1,5 @@
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
-import type { Product, ProductStatus, OrderStatus } from "@/lib/types";
+import type { Product, ProductStatus, OrderStatus, Customer } from "@/lib/types";
 
 const wooCommerceApiUrl = process.env.NEXT_PUBLIC_WOOCOMMERCE_API_URL;
 const wooCommerceConsumerKey = process.env.NEXT_PUBLIC_WOOCOMMERCE_CONSUMER_KEY;
@@ -28,7 +28,7 @@ type GetProductsParams = {
 
 export async function getProducts({
   page = 1,
-  status = 'all',
+  status,
   stock_status,
   orderby,
   order,
@@ -37,27 +37,23 @@ export async function getProducts({
   try {
     const params: any = {
       per_page: 20,
-      page: page,
+      page,
     };
-
-    if (status && status !== 'all') {
-      params.status = status;
-    }
-
-    if (stock_status) {
-      params.stock_status = stock_status;
-    }
-
-    if (orderby) {
-      params.orderby = orderby;
-    }
-
-    if (order) {
-      params.order = order;
-    }
 
     if (search) {
       params.search = search;
+    }
+    if (status && status !== 'all') {
+      params.status = status;
+    }
+    if (stock_status) {
+      params.stock_status = stock_status;
+    }
+    if (orderby) {
+      params.orderby = orderby;
+    }
+    if (order) {
+      params.order = order;
     }
 
     const response = await api.get("products", params);
@@ -87,7 +83,7 @@ export async function getProductCounts() {
     const publishedCount = Number(published.headers['x-wp-total']);
     const draftCount = Number(draft.headers['x-wp-total']);
 
-    const response = await api.get("products");
+    const response = await api.get("products", {per_page: 1});
     const allCount = Number(response.headers['x-wp-total']);
 
 
@@ -130,3 +126,15 @@ export async function getOrders(status: OrderStatus = 'any') {
       return [];
     }
   }
+
+export async function getProductBySKU(sku: string): Promise<Product[]> {
+    try {
+        const response = await api.get("products", {
+            sku: sku,
+        });
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching product by SKU ${sku}:`, error);
+        return [];
+    }
+}
