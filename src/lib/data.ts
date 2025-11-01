@@ -1,4 +1,5 @@
-import type { Product, Order, Customer } from './types';
+// This file is no longer used for the dashboard page, 
+// but is kept for reference or other potential uses.
 
 export const totalMetrics = [
   {

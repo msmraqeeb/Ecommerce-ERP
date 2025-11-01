@@ -1,7 +1,6 @@
 "use client"
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
-import { salesData } from "@/lib/data"
 import { ChartTooltipContent, ChartContainer, type ChartConfig } from "@/components/ui/chart"
 
 const chartConfig = {
@@ -11,11 +10,11 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function OverviewChart() {
+export function OverviewChart({ data }: { data: any[] }) {
   return (
     <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
       <ResponsiveContainer width="100%" height={350}>
-        <BarChart data={salesData}>
+        <BarChart data={data}>
           <XAxis
             dataKey="name"
             stroke="hsl(var(--muted-foreground))"
@@ -33,7 +32,7 @@ export function OverviewChart() {
           <Tooltip
             cursorClassName="fill-muted"
             content={<ChartTooltipContent
-              formatter={(value) => `৳${value}`}
+              formatter={(value) => `৳${value.toLocaleString()}`}
               indicator="dot"
                />}
           />

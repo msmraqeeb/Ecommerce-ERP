@@ -5,26 +5,111 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import {
   DollarSign,
   Users,
   CreditCard,
   Activity,
+  ShoppingCart,
+  CheckCircle,
+  Clock,
 } from 'lucide-react';
-import { recentSales, totalMetrics } from '@/lib/data';
 import { OverviewChart } from '@/components/charts/overview-chart';
+import { getOrders } from '@/lib/woocommerce';
+import type { Order } from '@/lib/types';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
-export default function DashboardPage() {
+function getAvatarInfo(name: string) {
+    const fallback = name
+      .split(' ')
+      .map((n) => n[0])
+      .join('');
+    // Simple hash to get a consistent image from placeholder array
+    const imageIndex = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % PlaceHolderImages.length;
+    const image = PlaceHolderImages[imageIndex];
+    return {
+      src: image.imageUrl,
+      fallback,
+      hint: image.imageHint,
+    };
+}
+
+
+export default async function DashboardPage() {
+  const allOrders: Order[] = await getOrders('any');
+
+  const totalRevenue = allOrders
+    .filter(order => order.status === 'completed')
+    .reduce((sum, order) => sum + parseFloat(order.total), 0);
+
+  const completedOrders = allOrders.filter(order => order.status === 'completed').length;
+  const processingOrders = allOrders.filter(order => order.status === 'processing').length;
+  
+  const totalMetrics = [
+      {
+          title: 'Total Revenue',
+          value: `৳${totalRevenue.toFixed(2)}`,
+          change: 'From completed orders',
+          icon: <DollarSign className="h-4 w-4 text-muted-foreground" />,
+      },
+      {
+          title: 'Total Orders',
+          value: `+${allOrders.length}`,
+          change: 'All-time',
+          icon: <ShoppingCart className="h-4 w-4 text-muted-foreground" />,
+      },
+      {
+          title: 'Completed Orders',
+          value: `+${completedOrders}`,
+          change: 'All-time',
+          icon: <CheckCircle className="h-4 w-4 text-muted-foreground" />,
+      },
+      {
+          title: 'Processing Orders',
+          value: `+${processingOrders}`,
+          change: 'Currently processing',
+          icon: <Clock className="h-4 w-4 text-muted-foreground" />,
+      },
+  ]
+
+  const recentSales = allOrders.slice(0, 5).map(order => {
+      const name = `${order.billing.first_name} ${order.billing.last_name}`;
+      const avatarInfo = getAvatarInfo(name);
+      return {
+          id: order.id,
+          name: name,
+          email: order.billing.email,
+          amount: `৳${order.total}`,
+          avatar: {
+              src: avatarInfo.src,
+              fallback: avatarInfo.fallback,
+              hint: avatarInfo.hint,
+          }
+      }
+  })
+
+  // Prepare data for the overview chart
+  const salesByMonth: { [key: string]: number } = {};
+  const currentYear = new Date().getFullYear();
+
+  allOrders.forEach(order => {
+      const orderDate = new Date(order.date_created);
+      if (order.status === 'completed' && orderDate.getFullYear() === currentYear) {
+          const month = orderDate.toLocaleString('default', { month: 'short' });
+          if (!salesByMonth[month]) {
+              salesByMonth[month] = 0;
+          }
+          salesByMonth[month] += parseFloat(order.total);
+      }
+  });
+
+  const monthOrder = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const salesData = monthOrder.map(month => ({
+      name: month,
+      total: salesByMonth[month] || 0,
+  }));
+
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <h2 className="text-3xl font-bold tracking-tight font-headline">
@@ -37,10 +122,7 @@ export default function DashboardPage() {
               <CardTitle className="text-sm font-medium">
                 {metric.title}
               </CardTitle>
-              {metric.icon === 'DollarSign' && <DollarSign className="h-4 w-4 text-muted-foreground" />}
-              {metric.icon === 'Users' && <Users className="h-4 w-4 text-muted-foreground" />}
-              {metric.icon === 'CreditCard' && <CreditCard className="h-4 w-4 text-muted-foreground" />}
-              {metric.icon === 'Activity' && <Activity className="h-4 w-4 text-muted-foreground" />}
+              {metric.icon}
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{metric.value}</div>
@@ -55,14 +137,14 @@ export default function DashboardPage() {
             <CardTitle className="font-headline">Overview</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
-            <OverviewChart />
+            <OverviewChart data={salesData} />
           </CardContent>
         </Card>
         <Card className="col-span-4 lg:col-span-3">
           <CardHeader>
             <CardTitle className="font-headline">Recent Sales</CardTitle>
             <CardDescription>
-              You made {recentSales.length} sales this month.
+              Your 5 most recent sales.
             </CardDescription>
           </CardHeader>
           <CardContent>
