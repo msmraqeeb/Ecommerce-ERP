@@ -38,58 +38,37 @@ export async function getProducts({
     const params: any = {
       per_page: 20,
       page,
-      status: (status && status !== 'all') ? status : 'any',
     };
+
+    if (status && status !== 'all' && status !== 'any') {
+      params.status = status;
+    } else {
+      params.status = 'any';
+    }
 
     if (stock_status) params.stock_status = stock_status;
     if (orderby) params.orderby = orderby;
     if (order) params.order = order;
     
     let combinedProducts: Product[] = [];
-    let totalProducts = 0;
-    let totalPages = 0;
-
+    let totalProductsHeader = '0';
+    let totalPagesHeader = '0';
+    
     if (search) {
-      // Perform two separate searches: one for general text and one for SKU
-      const [textSearchResponse, skuSearchResponse] = await Promise.all([
-        api.get("products", { ...params, search }),
-        api.get("products", { ...params, sku: search })
-      ]);
-
-      const textProducts: Product[] = textSearchResponse.data;
-      const skuProducts: Product[] = skuSearchResponse.data;
-
-      // Combine and deduplicate results
-      const allProducts = [...textProducts, ...skuProducts];
-      const uniqueProductIds = new Set<number>();
-      combinedProducts = allProducts.filter(product => {
-        if (!uniqueProductIds.has(product.id)) {
-          uniqueProductIds.add(product.id);
-          return true;
-        }
-        return false;
-      });
-      
-      // For simplicity, pagination might not be perfect with combined results,
-      // but we can estimate or use the larger of the two counts.
-      totalProducts = uniqueProductIds.size; // This is only for the current page. A full count is more complex.
-      // In a real-world scenario, you might need a more sophisticated pagination for combined searches.
-      // For this implementation, we will show the results from the first page of both queries.
-      totalPages = 1; // Simplification for now.
-
-    } else {
-      // No search term, just fetch with filters
-      const response = await api.get("products", params);
-      combinedProducts = response.data;
-      totalPages = Number(response.headers['x-wp-totalpages']);
-      totalProducts = Number(response.headers['x-wp-total']);
+      params.search = search;
     }
+
+    const response = await api.get("products", params);
+    combinedProducts = response.data;
+    totalPagesHeader = response.headers['x-wp-totalpages'];
+    totalProductsHeader = response.headers['x-wp-total'];
 
     return {
       products: combinedProducts,
-      totalPages,
-      totalProducts,
+      totalPages: Number(totalPagesHeader),
+      totalProducts: Number(totalProductsHeader),
     };
+
   } catch (error) {
     console.error("Error fetching products:", error);
     return {
@@ -136,16 +115,39 @@ export async function getProductCounts() {
 }
 
 
-export async function getOrders(status: OrderStatus = 'any') {
+export async function getOrders(status: OrderStatus = 'any', dateRange?: { after?: string, before?: string }) {
     try {
-      const params: { per_page: number; status?: OrderStatus } = {
+      const params: any = {
           per_page: 100,
       };
       if (status && status !== 'any') {
         params.status = status;
       }
-      const response = await api.get("orders", params);
-      return response.data;
+       if (dateRange?.after) {
+        params.after = dateRange.after;
+      }
+      if (dateRange?.before) {
+        params.before = dateRange.before;
+      }
+
+      let allOrders: any[] = [];
+      let page = 1;
+      let totalPages = 1;
+
+      do {
+        const response = await api.get("orders", { ...params, page });
+        if (response.data && response.data.length > 0) {
+            allOrders = allOrders.concat(response.data);
+        }
+        if (response.headers && response.headers['x-wp-totalpages']) {
+            totalPages = Number(response.headers['x-wp-totalpages']);
+        } else {
+            totalPages = page;
+        }
+        page++;
+      } while (page <= totalPages);
+
+      return allOrders;
     } catch (error) {
       console.error("Error fetching orders:", error);
       return [];
