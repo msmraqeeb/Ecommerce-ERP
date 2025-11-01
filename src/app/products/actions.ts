@@ -32,7 +32,7 @@ export async function getAllProductsForExport() {
     let totalPages = 1;
 
     do {
-      const response = await api.get('products', {
+      const response: any = await api.get('products', {
         per_page: 100,
         page: page,
       });
@@ -41,7 +41,12 @@ export async function getAllProductsForExport() {
         allProducts = allProducts.concat(response.data);
       }
       
-      totalPages = Number(response.headers['x-wp-totalpages']);
+      if (response.headers && response.headers['x-wp-totalpages']) {
+        totalPages = Number(response.headers['x-wp-totalpages']);
+      } else {
+        // If the header is not present, we assume we are done
+        totalPages = page;
+      }
       page++;
 
     } while (page <= totalPages);
@@ -49,6 +54,7 @@ export async function getAllProductsForExport() {
     return allProducts;
   } catch (error) {
     console.error('Error fetching all products for export:', error);
+    // In case of an error, return an empty array or handle it as needed
     return [];
   }
 }
