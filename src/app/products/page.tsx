@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
+import { useDebounce } from "use-debounce";
 import {
   Card,
   CardContent,
@@ -54,6 +55,9 @@ function ProductsPageContent({
   const currentPage = Number(searchParams.get('page')) || 1;
   const currentStatus = (searchParams.get('status') as ProductStatus) || 'all';
   const search = searchParams.get('search') || '';
+
+  const [text, setText] = React.useState(search);
+  const [query] = useDebounce(text, 500);
 
   const getStatusBadge = (status: Product['status'] | Product['stock_status']) => {
     switch (status) {
@@ -109,12 +113,17 @@ function ProductsPageContent({
     return params.toString();
   }
 
-  const handleSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      const newSearch = event.currentTarget.value;
-      router.push(`/products?${buildQueryString({ search: newSearch })}`);
+  React.useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (query) {
+      params.set('search', query);
+      params.delete('page');
+    } else {
+      params.delete('search');
     }
-  };
+    router.push(`/products?${params.toString()}`);
+  }, [query, router, searchParams]);
+
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -123,7 +132,7 @@ function ProductsPageContent({
              {tabValues.map(status => (
                 <Link 
                   key={status} 
-                  href={`/products?${buildQueryString({ status: status, page: undefined })}`}
+                  href={`/products?${buildQueryString({ status: status, page: undefined, search: text || undefined })}`}
                   className={cn(
                     "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
                     currentStatus === status ? "bg-background text-foreground shadow-sm" : "hover:bg-background/50"
@@ -140,8 +149,8 @@ function ProductsPageContent({
                 name="search"
                 className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
                 placeholder="Search by name or SKU..."
-                defaultValue={search}
-                onKeyDown={handleSearch}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
               />
             </div>
           <div className="ml-auto flex items-center gap-2">
