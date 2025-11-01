@@ -1,5 +1,5 @@
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
-import type { ProductStatus } from "@/lib/types";
+import type { ProductStatus, OrderStatus } from "@/lib/types";
 
 const wooCommerceApiUrl = process.env.NEXT_PUBLIC_WOOCOMMERCE_API_URL;
 const wooCommerceConsumerKey = process.env.NEXT_PUBLIC_WOOCOMMERCE_CONSUMER_KEY;
@@ -22,18 +22,22 @@ export async function getProducts(page = 1, status: ProductStatus = 'all', stock
     const params: { 
         per_page: number; 
         page: number; 
-        status?: 'publish' | 'draft';
+        status?: 'publish' | 'draft' | 'pending' | 'private' | 'any';
         stock_status?: string;
         orderby?: string;
         order?: string;
     } = {
         per_page: 20,
         page: page,
+        status: 'any',
     };
 
     if (status === 'publish' || status === 'draft') {
         params.status = status;
+    } else if (status === 'all') {
+        params.status = 'any';
     }
+
 
     if (stockStatus) {
       params.stock_status = stockStatus;
@@ -86,11 +90,15 @@ export async function getProductCounts() {
 }
 
 
-export async function getOrders() {
+export async function getOrders(status: OrderStatus = 'any') {
     try {
-      const response = await api.get("orders", {
+      const params: { per_page: number; status?: OrderStatus } = {
           per_page: 100,
-      });
+      };
+      if (status && status !== 'any') {
+        params.status = status;
+      }
+      const response = await api.get("orders", params);
       return response.data;
     } catch (error) {
       console.error("Error fetching orders:", error);

@@ -1,4 +1,4 @@
-export type ProductStatus = 'all' | 'publish' | 'draft';
+export type ProductStatus = 'all' | 'publish' | 'draft' | 'pending' | 'private' | 'any';
 
 export type Product = {
   id: number;
@@ -12,6 +12,8 @@ export type Product = {
   total_sales: number;
   stock_quantity: number;
 };
+
+export type OrderStatus = 'any' | 'pending' | 'processing' | 'on-hold' | 'completed' | 'cancelled' | 'refunded' | 'failed';
 
 export type Order = {
   id: number;
