@@ -1,6 +1,7 @@
 'use server';
 
 import WooCommerceRestApi from '@woocommerce/woocommerce-rest-api';
+import { getProductBySKU } from '@/lib/woocommerce';
 
 const wooCommerceApiUrl = process.env.NEXT_PUBLIC_WOOCOMMERCE_API_URL;
 const wooCommerceConsumerKey = process.env.NEXT_PUBLIC_WOOCOMMERCE_CONSUMER_KEY;
@@ -66,5 +67,43 @@ export async function updateProduct(id: number, data: any) {
   } catch (error: any) {
     console.error('Error updating product:', error.response.data);
     return { success: false, error: error.response.data.message || 'Failed to update product.' };
+  }
+}
+
+export async function updateProductFromSync(identifier: string, correctedData: any) {
+  try {
+    // The AI might return various keys. We need to map them to what WooCommerce expects.
+    const wooData: { [key: string]: any } = {};
+    
+    if (correctedData.name) wooData.name = correctedData.name;
+    if (correctedData.price) wooData.regular_price = correctedData.price;
+    if (correctedData.stock_quantity !== undefined) {
+        wooData.stock_quantity = correctedData.stock_quantity;
+        wooData.manage_stock = true; // Required to update stock
+    }
+
+    // Find the product ID. The identifier could be the ID or SKU.
+    let productId: number | null = null;
+
+    // First, try to find the product by SKU. This is more reliable.
+    const productsBySku = await getProductBySKU(identifier);
+    if (productsBySku && productsBySku.length > 0) {
+        productId = productsBySku[0].id;
+    } else if (!isNaN(Number(identifier))) {
+        // If not found by SKU, and if the identifier is a number, assume it's the product ID.
+        // A more robust solution might check if the product exists by ID first.
+        productId = Number(identifier);
+    }
+
+    if (!productId) {
+        throw new Error(`Product with SKU or ID '${identifier}' not found.`);
+    }
+    
+    const response = await api.put(`products/${productId}`, wooData);
+    return { success: true, data: response.data };
+  } catch (error: any) {
+    const errorMessage = error.response?.data?.message || error.message || 'Failed to update product from sync.';
+    console.error('Error in updateProductFromSync:', errorMessage);
+    return { success: false, error: errorMessage };
   }
 }

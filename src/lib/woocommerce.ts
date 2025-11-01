@@ -26,6 +26,17 @@ type GetProductsParams = {
   search?: string;
 }
 
+export async function getProductBySKU(sku: string): Promise<Product[]> {
+    if (!sku) return [];
+    try {
+        const response = await api.get("products", { sku: sku });
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching product with SKU ${sku}:`, error);
+        return [];
+    }
+}
+
 export async function getProducts({
   page = 1,
   status,
@@ -55,13 +66,40 @@ export async function getProducts({
     let totalPagesHeader = '0';
     
     if (search) {
-      params.search = search;
-    }
+      // Primary search by general term (name, desc)
+      const searchResponse = await api.get("products", { ...params, search: search });
+      if (searchResponse.data) {
+        combinedProducts = combinedProducts.concat(searchResponse.data);
+      }
+      
+      // Secondary search specifically by SKU
+      const skuResponse = await api.get("products", { ...params, sku: search });
+      if (skuResponse.data) {
+         combinedProducts = combinedProducts.concat(skuResponse.data);
+      }
 
-    const response = await api.get("products", params);
-    combinedProducts = response.data;
-    totalPagesHeader = response.headers['x-wp-totalpages'];
-    totalProductsHeader = response.headers['x-wp-total'];
+      // Remove duplicates
+      const uniqueIds = new Set();
+      combinedProducts = combinedProducts.filter(product => {
+        if (uniqueIds.has(product.id)) {
+          return false;
+        } else {
+          uniqueIds.add(product.id);
+          return true;
+        }
+      });
+      
+      // Since we are combining results, the pagination headers from a single API call are not accurate.
+      // We'll set them based on the combined results.
+      totalProductsHeader = String(combinedProducts.length);
+      totalPagesHeader = "1"; // We are showing all results on one page for now. A more complex pagination would be needed for large result sets.
+
+    } else {
+       const response = await api.get("products", params);
+       combinedProducts = response.data;
+       totalPagesHeader = response.headers['x-wp-totalpages'];
+       totalProductsHeader = response.headers['x-wp-total'];
+    }
 
     return {
       products: combinedProducts,

@@ -15,6 +15,7 @@ import { dataSyncAssistance, DataSyncAssistanceOutput } from '@/ai/flows/data-sy
 import { exampleErpData, exampleProductData } from '@/lib/data';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { updateProductFromSync } from '@/app/products/actions';
 
 export default function DataSyncPage() {
   const [productData, setProductData] = useState(
@@ -36,6 +37,44 @@ export default function DataSyncPage() {
         existingProductData: existingData,
       });
       setResult(output);
+
+      if (!output.isDataCorrect) {
+        try {
+            const correctedData = JSON.parse(output.correctedProductData);
+            const productId = correctedData.product_id || correctedData.sku; // Assuming ID or SKU is present
+            
+            if (!productId) {
+                throw new Error("Product ID or SKU not found in corrected data.");
+            }
+
+            // The AI might return the ID as a string, but the update function needs a number if it's the ID.
+            // We'll try to find the product by SKU first, which is more robust.
+            const updateResult = await updateProductFromSync(productId, correctedData);
+
+            if (updateResult.success) {
+                toast({
+                    title: "Product Updated Successfully",
+                    description: `Product ${updateResult.data.name} has been synced with the ERP data.`,
+                });
+            } else {
+                 throw new Error(updateResult.error || "An unknown error occurred during the update.");
+            }
+
+        } catch(updateError: any) {
+            console.error("Failed to update product:", updateError);
+            toast({
+                variant: 'destructive',
+                title: 'Update Failed',
+                description: `Could not save the corrected data to WooCommerce. ${updateError.message}`,
+            });
+        }
+      } else {
+         toast({
+            title: "Data Verified",
+            description: "Product data is already consistent. No update needed.",
+        });
+      }
+
     } catch (error) {
       console.error('Data sync failed:', error);
       toast({
@@ -55,7 +94,7 @@ export default function DataSyncPage() {
           <CardHeader>
             <CardTitle className="font-headline">Data Sync Assistance</CardTitle>
             <CardDescription>
-              Verify and correct product data discrepancies between Kidsparadise.com.bd and your ERP system using AI.
+              Verify, correct, and update product data discrepancies between Kidsparadise.com.bd and your ERP system using AI.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -85,10 +124,10 @@ export default function DataSyncPage() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Verifying...
+                  Verifying & Updating...
                 </>
               ) : (
-                'Verify & Correct Data'
+                'Verify, Correct & Update Data'
               )}
             </Button>
           </CardContent>
@@ -108,7 +147,7 @@ export default function DataSyncPage() {
               <CardDescription>
                 {result.isDataCorrect
                   ? 'Data is consistent between both platforms.'
-                  : 'Discrepancies found. See details below.'}
+                  : 'Discrepancies found. See details and corrected data below. An update has been attempted.'}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -119,7 +158,7 @@ export default function DataSyncPage() {
                     <p className="text-sm text-muted-foreground mt-1">{result.discrepancyDetails}</p>
                  </div>
                  <div>
-                    <Label className="font-semibold">Corrected Product Data</Label>
+                    <Label className="font-semibold">Corrected Product Data (Applied)</Label>
                     <Textarea
                         readOnly
                         value={result.correctedProductData}
