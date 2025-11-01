@@ -2,6 +2,18 @@
 import 'dotenv/config';
 import { api } from '@/lib/woocommerce';
 import { getProductBySKU } from '@/lib/woocommerce';
+import type { Product } from '@/lib/types';
+
+
+export async function getProductById(id: number): Promise<Product | null> {
+  try {
+    const response = await api.get(`products/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching product with ID ${id}:`, error);
+    return null;
+  }
+}
 
 export async function getAllProductsForExport() {
   try {

@@ -80,16 +80,6 @@ export async function getProducts({
   }
 }
 
-export async function getProductById(id: number): Promise<Product | null> {
-  try {
-    const response = await api.get(`products/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching product with ID ${id}:`, error);
-    return null;
-  }
-}
-
 export async function getProductCounts() {
   try {
     // Fetching all products with status 'any' to get the total count.
