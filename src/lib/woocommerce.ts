@@ -30,7 +30,7 @@ type GetProductsParams = {
 export async function getProductBySKU(sku: string): Promise<Product[]> {
     if (!sku) return [];
     try {
-        const response = await api.get("products", { sku: sku });
+        const response = await api.get("products", { sku: sku, per_page: 100 });
         return response.data;
     } catch (error) {
         console.error(`Error fetching product with SKU ${sku}:`, error);
@@ -60,7 +60,20 @@ export async function getProducts({
     if (stock_status) params.stock_status = stock_status;
     if (orderby) params.orderby = orderby;
     if (order) params.order = order;
-    if (search) params.search = search;
+    
+    // If there's a search term, first try to find an exact SKU match.
+    if (search) {
+      const skuResults = await getProductBySKU(search);
+      if (skuResults.length > 0) {
+        return {
+          products: skuResults,
+          totalPages: 1,
+          totalProducts: skuResults.length,
+        };
+      }
+      // If no SKU match, fall back to a general search.
+      params.search = search;
+    }
 
     const response = await api.get("products", params);
 
