@@ -61,16 +61,46 @@ export function ProductsPageContent({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const currentPage = Number(searchParams.get('page')) || 1;
-  const currentStatus = (searchParams.get('status') as ProductStatus) || 'all';
-  const stockStatus = searchParams.get('stock_status');
-  const orderby = searchParams.get('orderby');
-  const order = searchParams.get('order');
-  const search = searchParams.get('search') || '';
 
-  const [text, setText] = React.useState(search);
+  const [text, setText] = React.useState(searchParams.get('search') || '');
   const [query] = useDebounce(text, 500);
   const [isExporting, setIsExporting] = React.useState(false);
+
+  const currentPage = Number(searchParams.get('page')) || 1;
+  const currentStatus = (searchParams.get('status') as ProductStatus) || 'all';
+
+  const buildQueryString = React.useCallback(
+    (newParams: Record<string, string | number | undefined>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      for (const [key, value] of Object.entries(newParams)) {
+        if (value === undefined || value === null || String(value) === '') {
+          params.delete(key);
+        } else {
+          params.set(key, String(value));
+        }
+      }
+      // Reset page on new filters/search, except for pagination itself
+      if (!('page' in newParams)) {
+        params.delete('page');
+      }
+
+      // Clean up default values
+      if (params.get('status') === 'all') {
+        params.delete('status');
+      }
+      if (params.get('page') === '1') {
+        params.delete('page');
+      }
+
+      return params.toString();
+    },
+    [searchParams]
+  );
+  
+  React.useEffect(() => {
+    const newQueryString = buildQueryString({ search: query, page: undefined });
+    router.push(`/products?${newQueryString}`);
+  }, [query, buildQueryString, router]);
 
 
   const getStatusBadge = (
@@ -107,33 +137,6 @@ export function ProductsPageContent({
   };
 
   const tabValues: ProductStatus[] = ['all', 'publish', 'draft'];
-
-  const buildQueryString = React.useCallback(
-    (newParams: Record<string, string | number | undefined>) => {
-      const params = new URLSearchParams(searchParams.toString());
-      for (const [key, value] of Object.entries(newParams)) {
-        if (value === undefined || value === null || String(value) === '') {
-          params.delete(key);
-        } else {
-          params.set(key, String(value));
-        }
-      }
-      // Always reset page on new filters/search, except for pagination itself
-      if (!('page' in newParams)) {
-        params.delete('page');
-      }
-
-      if (params.get('status') === 'all') {
-        params.delete('status');
-      }
-      if (params.get('page') === '1') {
-        params.delete('page');
-      }
-
-      return params.toString();
-    },
-    [searchParams]
-  );
     
   const handleExport = async () => {
     setIsExporting(true);
@@ -167,14 +170,6 @@ export function ProductsPageContent({
         setIsExporting(false);
     }
   };
-
-
-  React.useEffect(() => {
-    const newQuery = buildQueryString({ search: query });
-    if (newQuery !== searchParams.toString().replace(/&?search=[^&]*/, '')) {
-       router.push(`/products?${newQuery}`);
-    }
-  }, [query, router, buildQueryString, searchParams]);
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -223,40 +218,6 @@ export function ProductsPageContent({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="font-normal text-xs">
-                Status
-              </DropdownMenuLabel>
-              <DropdownMenuItem asChild>
-                <Link
-                  className="w-full"
-                  href={`/products?${buildQueryString({
-                    status: 'all',
-                  })}`}
-                >
-                  All
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link
-                  className="w-full"
-                  href={`/products?${buildQueryString({
-                    status: 'publish',
-                  })}`}
-                >
-                  Published
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link
-                  className="w-full"
-                  href={`/products?${buildQueryString({
-                    status: 'draft',
-                  })}`}
-                >
-                  Draft
-                </Link>
-              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuLabel className="font-normal text-xs">
                 Stock Status

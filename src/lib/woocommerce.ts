@@ -41,9 +41,12 @@ export async function getProducts({
       page,
     };
 
-    if (status && status !== 'all') {
+    if (status && status !== 'all' && status !== 'any') {
       params.status = status;
+    } else {
+      params.status = 'any';
     }
+
     if (stock_status) {
       params.stock_status = stock_status;
     }
@@ -89,17 +92,17 @@ export async function getProductById(id: number): Promise<Product | null> {
 
 export async function getProductCounts() {
   try {
-    const [published, draft] = await Promise.all([
-      api.get("products", { status: 'publish', per_page: 1 }),
-      api.get("products", { status: 'draft', per_page: 1 })
-    ]);
+    // Fetching all products with status 'any' to get the total count.
+    const allResponse = await api.get("products", { status: 'any', per_page: 1 });
+    const allCount = Number(allResponse.headers['x-wp-total']);
 
-    const publishedCount = Number(published.headers['x-wp-total']);
-    const draftCount = Number(draft.headers['x-wp-total']);
+    // Fetching published products count.
+    const publishedResponse = await api.get("products", { status: 'publish', per_page: 1 });
+    const publishedCount = Number(publishedResponse.headers['x-wp-total']);
 
-    const response = await api.get("products", {per_page: 1});
-    const allCount = Number(response.headers['x-wp-total']);
-
+    // Fetching draft products count.
+    const draftResponse = await api.get("products", { status: 'draft', per_page: 1 });
+    const draftCount = Number(draftResponse.headers['x-wp-total']);
 
     return {
       all: allCount,
