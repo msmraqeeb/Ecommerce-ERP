@@ -59,6 +59,9 @@ export function ProductsPageContent({
   const searchParams = useSearchParams();
   const currentPage = Number(searchParams.get('page')) || 1;
   const currentStatus = (searchParams.get('status') as ProductStatus) || 'all';
+  const stockStatus = searchParams.get('stock_status');
+  const orderby = searchParams.get('orderby');
+  const order = searchParams.get('order');
   const search = searchParams.get('search') || '';
 
   const [text, setText] = React.useState(search);
@@ -110,7 +113,7 @@ export function ProductsPageContent({
         params.set(key, String(value));
       }
     }
-    // Always reset page on new search
+    // Always reset page on new filters/search, except for pagination itself
     if (Object.keys(newParams).some(key => key !== 'page')) {
       params.delete('page');
     }
@@ -118,6 +121,7 @@ export function ProductsPageContent({
     if (params.get('status') === 'all') {
       params.delete('status');
     }
+
     if (params.get('page') === '1') {
       params.delete('page');
     }
@@ -125,9 +129,15 @@ export function ProductsPageContent({
   };
 
   React.useEffect(() => {
-    const queryString = buildQueryString({ search: query || undefined });
-    router.push(`/products?${queryString}`);
-  }, [query]);
+    const params = new URLSearchParams(searchParams.toString());
+    if (query) {
+      params.set('search', query);
+      params.delete('page');
+    } else {
+      params.delete('search');
+    }
+    router.push(`/products?${params.toString()}`);
+  }, [query, router]);
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -138,7 +148,6 @@ export function ProductsPageContent({
               key={status}
               href={`/products?${buildQueryString({
                 status: status,
-                page: undefined
               })}`}
               className={cn(
                 'inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
@@ -186,7 +195,6 @@ export function ProductsPageContent({
                   className="w-full"
                   href={`/products?${buildQueryString({
                     status: 'all',
-                    page: undefined,
                   })}`}
                 >
                   All
@@ -197,7 +205,6 @@ export function ProductsPageContent({
                   className="w-full"
                   href={`/products?${buildQueryString({
                     status: 'publish',
-                    page: undefined,
                   })}`}
                 >
                   Published
@@ -208,7 +215,6 @@ export function ProductsPageContent({
                   className="w-full"
                   href={`/products?${buildQueryString({
                     status: 'draft',
-                    page: undefined,
                   })}`}
                 >
                   Draft

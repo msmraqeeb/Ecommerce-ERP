@@ -55,7 +55,7 @@ export async function getProducts({
     if (order) {
       params.order = order;
     }
-
+    
     const response = await api.get("products", params);
 
     return {
