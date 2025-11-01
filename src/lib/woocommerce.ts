@@ -17,15 +17,34 @@ const api = new WooCommerceRestApi({
   queryStringAuth: true,
 });
 
-export async function getProducts(page = 1, status: ProductStatus = 'all') {
+export async function getProducts(page = 1, status: ProductStatus = 'all', stockStatus?: string, orderby?: string, order?: string) {
   try {
-    const params: { per_page: number; page: number; status?: 'publish' | 'draft' } = {
+    const params: { 
+        per_page: number; 
+        page: number; 
+        status?: 'publish' | 'draft';
+        stock_status?: string;
+        orderby?: string;
+        order?: string;
+    } = {
         per_page: 20,
         page: page,
     };
 
     if (status === 'publish' || status === 'draft') {
         params.status = status;
+    }
+
+    if (stockStatus) {
+      params.stock_status = stockStatus;
+    }
+
+    if (orderby) {
+      params.orderby = orderby;
+    }
+
+    if (order) {
+      params.order = order;
     }
 
     const response = await api.get("products", params);

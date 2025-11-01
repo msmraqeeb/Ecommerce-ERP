@@ -7,7 +7,7 @@ export type Product = {
     src: string;
   }[];
   stock_status: 'instock' | 'outofstock' | 'onbackorder';
-  status: 'publish' | 'draft';
+  status: 'publish' | 'draft' | 'pending' | 'private';
   price: string;
   total_sales: number;
   stock_quantity: number;
