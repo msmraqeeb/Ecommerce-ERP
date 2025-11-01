@@ -170,8 +170,11 @@ export function ProductsPageContent({
 
 
   React.useEffect(() => {
-    router.push(`/products?${buildQueryString({ search: query })}`);
-  }, [query, router, buildQueryString]);
+    const newQuery = buildQueryString({ search: query });
+    if (newQuery !== searchParams.toString().replace(/&?search=[^&]*/, '')) {
+       router.push(`/products?${newQuery}`);
+    }
+  }, [query, router, buildQueryString, searchParams]);
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -420,7 +423,9 @@ export function ProductsPageContent({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/products/${product.id}/edit`}>Edit</Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem>Duplicate</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-destructive">

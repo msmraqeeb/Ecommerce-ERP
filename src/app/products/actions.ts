@@ -32,17 +32,17 @@ export async function getAllProductsForExport() {
     let totalPages = 1;
 
     do {
-      const response: any = await api.get('products', {
+      const { data, headers }: any = await api.get('products', {
         per_page: 100,
         page: page,
       });
 
-      if (response.data && response.data.length > 0) {
-        allProducts = allProducts.concat(response.data);
+      if (data && data.length > 0) {
+        allProducts = allProducts.concat(data);
       }
       
-      if (response.headers && response.headers['x-wp-totalpages']) {
-        totalPages = Number(response.headers['x-wp-totalpages']);
+      if (headers && headers['x-wp-totalpages']) {
+        totalPages = Number(headers['x-wp-totalpages']);
       } else {
         // If the header is not present, we assume we are done
         totalPages = page;
@@ -56,5 +56,15 @@ export async function getAllProductsForExport() {
     console.error('Error fetching all products for export:', error);
     // In case of an error, return an empty array or handle it as needed
     return [];
+  }
+}
+
+export async function updateProduct(id: number, data: any) {
+  try {
+    const response = await api.put(`products/${id}`, data);
+    return { success: true, data: response.data };
+  } catch (error: any) {
+    console.error('Error updating product:', error.response.data);
+    return { success: false, error: error.response.data.message || 'Failed to update product.' };
   }
 }
