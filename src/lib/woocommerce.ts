@@ -26,17 +26,6 @@ type GetProductsParams = {
   search?: string;
 }
 
-export async function getProductBySKU(sku: string): Promise<Product[]> {
-    try {
-        const response = await api.get("products", {
-            sku: sku,
-        });
-        return response.data;
-    } catch (error) {
-        console.error(`Error fetching product by SKU ${sku}:`, error);
-        return [];
-    }
-}
 
 export async function getProducts({
   page = 1,
@@ -64,36 +53,14 @@ export async function getProducts({
     if (order) {
       params.order = order;
     }
-    
-    let products: Product[] = [];
-    let totalProducts = 0;
-    let totalPages = 0;
-
     if (search) {
-        // First, search by general term (name, description)
-        const searchResponse = await api.get("products", { ...params, search });
-        const productsByName = searchResponse.data;
-
-        // Then, search by SKU
-        const productsBySku = await getProductBySKU(search);
-        
-        // Combine and deduplicate
-        const combined = [...productsByName, ...productsBySku];
-        const uniqueProducts = Array.from(new Map(combined.map(p => [p.id, p])).values());
-        
-        totalProducts = uniqueProducts.length;
-        totalPages = Math.ceil(totalProducts / 20);
-        // Manual pagination for combined results
-        const start = (page - 1) * 20;
-        const end = start + 20;
-        products = uniqueProducts.slice(start, end);
-
-    } else {
-        const response = await api.get("products", params);
-        products = response.data;
-        totalPages = Number(response.headers['x-wp-totalpages']);
-        totalProducts = Number(response.headers['x-wp-total']);
+      params.search = search;
     }
+    
+    const response = await api.get("products", params);
+    const products: Product[] = response.data;
+    const totalPages = Number(response.headers['x-wp-totalpages']);
+    const totalProducts = Number(response.headers['x-wp-total']);
 
     return {
       products,
