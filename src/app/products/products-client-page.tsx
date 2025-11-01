@@ -102,42 +102,36 @@ export function ProductsPageContent({
 
   const tabValues: ProductStatus[] = ['all', 'publish', 'draft'];
 
-  const buildQueryString = (
-    newParams: Record<string, string | number | undefined>
-  ) => {
-    const params = new URLSearchParams(searchParams.toString());
-    for (const [key, value] of Object.entries(newParams)) {
-      if (value === undefined || value === null || String(value) === '') {
-        params.delete(key);
-      } else {
-        params.set(key, String(value));
+  const buildQueryString = React.useCallback(
+    (newParams: Record<string, string | number | undefined>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      for (const [key, value] of Object.entries(newParams)) {
+        if (value === undefined || value === null || String(value) === '') {
+          params.delete(key);
+        } else {
+          params.set(key, String(value));
+        }
       }
-    }
-    // Always reset page on new filters/search, except for pagination itself
-    if (Object.keys(newParams).some(key => key !== 'page')) {
-      params.delete('page');
-    }
-    
-    if (params.get('status') === 'all') {
-      params.delete('status');
-    }
+      // Always reset page on new filters/search, except for pagination itself
+      if (!('page' in newParams)) {
+        params.delete('page');
+      }
 
-    if (params.get('page') === '1') {
-      params.delete('page');
-    }
-    return params.toString();
-  };
+      if (params.get('status') === 'all') {
+        params.delete('status');
+      }
+      if (params.get('page') === '1') {
+        params.delete('page');
+      }
+
+      return params.toString();
+    },
+    [searchParams]
+  );
 
   React.useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (query) {
-      params.set('search', query);
-      params.delete('page');
-    } else {
-      params.delete('search');
-    }
-    router.push(`/products?${params.toString()}`);
-  }, [query, router]);
+    router.push(`/products?${buildQueryString({ search: query })}`);
+  }, [query, router, buildQueryString]);
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
