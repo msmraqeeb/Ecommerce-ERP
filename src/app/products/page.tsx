@@ -25,11 +25,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, PlusCircle, ChevronLeft, ChevronRight, ListFilter, File } from 'lucide-react';
+import { MoreHorizontal, PlusCircle, ChevronLeft, ChevronRight, ListFilter, File, Search } from 'lucide-react';
 import { getProducts, getProductCounts } from "@/lib/woocommerce";
 import type { Product, ProductStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 
 type StockStatus = 'instock' | 'outofstock' | 'onbackorder';
 
@@ -42,6 +43,7 @@ export default async function ProductsPage({
     stock_status?: StockStatus;
     orderby?: 'price';
     order?: 'asc' | 'desc';
+    search?: string;
   }
 }) {
   const currentPage = Number(searchParams?.page) || 1;
@@ -49,8 +51,16 @@ export default async function ProductsPage({
   const stockStatus = searchParams?.stock_status;
   const orderby = searchParams?.orderby;
   const order = searchParams?.order;
+  const search = searchParams?.search || '';
   
-  const { products, totalPages, totalProducts } = await getProducts(currentPage, currentStatus, stockStatus, orderby, order);
+  const { products, totalPages, totalProducts } = await getProducts({
+    page: currentPage, 
+    status: currentStatus, 
+    stock_status: stockStatus, 
+    orderby: orderby, 
+    order: order,
+    search: search
+  });
   const counts = await getProductCounts();
 
   const getStatusBadge = (status: Product['status'] | Product['stock_status']) => {
@@ -91,14 +101,19 @@ export default async function ProductsPage({
       ...searchParams,
       ...newParams
     };
+    // Clean up query params
     if (query.status === 'all') delete query.status;
     if (!query.page || query.page === '1') delete query.page;
+    if ('search' in newParams) query.page = undefined; // Reset page on new search
+    if(search === '') delete query.search;
+
+
     return query;
   }
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-       <div className="flex items-center">
+       <div className="flex items-center gap-4">
            <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
              {tabValues.map(status => (
                 <Link 
@@ -113,10 +128,20 @@ export default async function ProductsPage({
                 </Link>
               ))}
             </div>
+            <form method="get" className="relative ml-auto flex-1 md:grow-0">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                name="search"
+                className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+                placeholder="Search by name or SKU..."
+                defaultValue={search}
+              />
+            </form>
           <div className="ml-auto flex items-center gap-2">
              <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 gap-1">
+                <Button variant="outline" size="sm" className="h-10 gap-1">
                   <ListFilter className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                     Filter
@@ -126,7 +151,7 @@ export default async function ProductsPage({
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Filter by</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuLabel className="font-normal text-xs">Status</DropdownMenuLabel>
+                 <DropdownMenuLabel className="font-normal text-xs">Status</DropdownMenuLabel>
                  <DropdownMenuItem asChild><Link className="w-full" href={{ pathname: '/products', query: buildQuery({ status: 'all', page: undefined }) }}>All</Link></DropdownMenuItem>
                  <DropdownMenuItem asChild><Link className="w-full" href={{ pathname: '/products', query: buildQuery({ status: 'publish', page: undefined }) }}>Published</Link></DropdownMenuItem>
                  <DropdownMenuItem asChild><Link className="w-full" href={{ pathname: '/products', query: buildQuery({ status: 'draft', page: undefined }) }}>Draft</Link></DropdownMenuItem>
@@ -143,13 +168,13 @@ export default async function ProductsPage({
                 <DropdownMenuItem asChild><Link className="w-full" href={{ pathname: '/products', query: buildQuery({ orderby: 'price', order: 'desc' }) }}>High to Low</Link></DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button size="sm" variant="outline" className="h-8 gap-1">
+            <Button size="sm" variant="outline" className="h-10 gap-1">
               <File className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                 Export
               </span>
             </Button>
-            <Button size="sm" className="h-8 gap-1">
+            <Button size="sm" className="h-10 gap-1">
               <PlusCircle className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                 Add Product
@@ -172,6 +197,7 @@ export default async function ProductsPage({
                       <span className="sr-only">Image</span>
                     </TableHead>
                     <TableHead>Name</TableHead>
+                    <TableHead>SKU</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="hidden md:table-cell">Price</TableHead>
                     <TableHead className="hidden md:table-cell">
@@ -196,6 +222,7 @@ export default async function ProductsPage({
                         />
                       </TableCell>
                       <TableCell className="font-medium">{product.name}</TableCell>
+                      <TableCell>{product.sku}</TableCell>
                       <TableCell>{getStatusBadge(product.status)}</TableCell>
                       <TableCell className="hidden md:table-cell">৳{product.price}</TableCell>
                       <TableCell className="hidden md:table-cell">{getStatusBadge(product.stock_status)}</TableCell>

@@ -17,30 +17,44 @@ const api = new WooCommerceRestApi({
   queryStringAuth: true,
 });
 
-export async function getProducts(page = 1, status: ProductStatus = 'all', stockStatus?: string, orderby?: string, order?: string) {
+type GetProductsParams = {
+  page?: number;
+  status?: ProductStatus;
+  stock_status?: string;
+  orderby?: string;
+  order?: string;
+  search?: string;
+}
+
+export async function getProducts({
+  page = 1,
+  status = 'all',
+  stock_status,
+  orderby,
+  order,
+  search
+}: GetProductsParams = {}) {
   try {
     const params: { 
         per_page: number; 
         page: number; 
-        status?: 'publish' | 'draft' | 'pending' | 'private' | 'any';
+        status?: 'publish' | 'draft' | 'pending' | 'private';
         stock_status?: string;
         orderby?: string;
         order?: string;
+        search?: string;
+        sku?: string;
     } = {
         per_page: 20,
         page: page,
-        status: 'any',
     };
 
-    if (status === 'publish' || status === 'draft') {
+    if (status === 'publish' || status === 'draft' || status === 'pending' || status === 'private') {
         params.status = status;
-    } else if (status === 'all') {
-        params.status = 'any';
     }
 
-
-    if (stockStatus) {
-      params.stock_status = stockStatus;
+    if (stock_status) {
+      params.stock_status = stock_status;
     }
 
     if (orderby) {
@@ -49,6 +63,30 @@ export async function getProducts(page = 1, status: ProductStatus = 'all', stock
 
     if (order) {
       params.order = order;
+    }
+    
+    if (search) {
+      // The WooCommerce API does not support searching by name and SKU in one go.
+      // A common workaround is to make two separate requests and combine the results.
+      // However, for simplicity here, we'll search by name first, and if no results, search by SKU.
+      // A more robust solution might require parallel requests.
+      params.search = search;
+
+      let response = await api.get("products", params);
+
+      // If search by name yields no results, try searching by SKU
+      if (response.data.length === 0) {
+        delete params.search;
+        params.sku = search;
+        response = await api.get("products", params);
+      }
+
+       return {
+        products: response.data,
+        totalPages: Number(response.headers['x-wp-totalpages']),
+        totalProducts: Number(response.headers['x-wp-total'])
+      };
+
     }
 
     const response = await api.get("products", params);

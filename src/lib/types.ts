@@ -3,6 +3,7 @@ export type ProductStatus = 'all' | 'publish' | 'draft' | 'pending' | 'private' 
 export type Product = {
   id: number;
   name: string;
+  sku: string;
   images: {
     src: string;
   }[];
